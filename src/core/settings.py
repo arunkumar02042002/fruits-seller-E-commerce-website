@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # local
     "authentication",
     "common",
+    "main",
 ]
 
 MIDDLEWARE = [
