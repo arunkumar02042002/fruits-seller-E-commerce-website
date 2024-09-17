@@ -2,8 +2,9 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import ContactUs
+from .models import ContactUs, Testimonial
 from .choices import ContactUsStatusChoice
 from .forms import ContactUsForm
 
@@ -67,6 +68,94 @@ class ContactUsModelTests(TestCase):
         self.assertIsNone(contact.assigned_to)
 
 
+class TestimonialModelTests(TestCase):
+
+    def setUp(self):
+        """Set up any necessary data for the tests."""
+        self.user = User.objects.create_user(
+            username="testuser", email="testuser@example.com", password="password123"
+        )
+        self.photo = SimpleUploadedFile(
+            name="test_image.jpg", content=b"", content_type="image/jpeg"
+        )
+
+    def test_create_testimonial(self):
+        """Test creating a testimonial with valid data."""
+        testimonial = Testimonial.objects.create(
+            user=self.user,
+            photo=self.photo,
+            name="John Doe",
+            email="john.doe@example.com",
+            profession="Software Engineer",
+            feedback="Great service!",
+            rating="5",
+        )
+        self.assertEqual(Testimonial.objects.count(), 1)
+        self.assertEqual(testimonial.name, "John Doe")
+        self.assertEqual(testimonial.email, "john.doe@example.com")
+        self.assertEqual(testimonial.rating, "5")
+
+    def test_string_representation(self):
+        """Test the string representation of the Testimonial model."""
+        testimonial = Testimonial.objects.create(
+            user=self.user,
+            photo=self.photo,
+            name="John Doe",
+            email="john.doe@example.com",
+            profession="Software Engineer",
+            feedback="Great service!",
+            rating="5",
+        )
+        self.assertEqual(str(testimonial), "John Doe_john.doe@example.com")
+
+    def test_create_testimonial_without_user(self):
+        """Test creating a testimonial without a user (null user field)."""
+        testimonial = Testimonial.objects.create(
+            photo=self.photo,
+            name="Jane Smith",
+            email="jane.smith@example.com",
+            profession="Data Scientist",
+            feedback="Amazing experience!",
+            rating="4",
+        )
+        self.assertIsNone(testimonial.user)
+        self.assertEqual(testimonial.name, "Jane Smith")
+
+    def test_create_testimonial_without_email(self):
+        """Test creating a testimonial without an email (blank email field)."""
+        testimonial = Testimonial.objects.create(
+            user=self.user,
+            photo=self.photo,
+            name="Michael Brown",
+            profession="Product Manager",
+            feedback="Loved the product!",
+            rating="5",
+        )
+        # The email field should be None
+        self.assertIsNone(testimonial.email)
+        self.assertEqual(testimonial.name, "Michael Brown")
+
+    def test_update_testimonial(self):
+        """Test updating a testimonial's feedback and rating."""
+        testimonial = Testimonial.objects.create(
+            user=self.user,
+            photo=self.photo,
+            name="Sam Williams",
+            email="sam.williams@example.com",
+            profession="HR Manager",
+            feedback="Good service overall.",
+            rating="4",
+        )
+        # Update the testimonial
+        testimonial.feedback = "Excellent service!"
+        testimonial.rating = "5"
+        testimonial.save()
+
+        updated_testimonial = Testimonial.objects.get(id=testimonial.id)
+        self.assertEqual(updated_testimonial.feedback, "Excellent service!")
+        self.assertEqual(updated_testimonial.rating, "5")
+
+
 class AboutUsViewTests(TestCase):
     def test_about_us_template_used_and_status_code(self):
         """Test that the AboutUsView uses the correct template and status code."""
@@ -79,7 +168,9 @@ class ContactUsViewTests(TestCase):
 
     def setUp(self):
         """Set up any necessary data for the tests."""
-        self.user = User.objects.create_user(username="testuser", email="testuser@example.com", password="password123")
+        self.user = User.objects.create_user(
+            username="testuser", email="testuser@example.com", password="password123"
+        )
         self.url = reverse("contact")
 
     def test_get_contact_us_view(self):
@@ -106,12 +197,12 @@ class ContactUsViewTests(TestCase):
         valid_data = {
             "name": "John Doe",
             "email": "john.doe@example.com",
-            "query": "This is a test query."
+            "query": "This is a test query.",
         }
 
         # Make the POST request with valid form data
         response = self.client.post(self.url, data=valid_data)
-        
+
         # Check that the query was saved to the database
         contact_us = ContactUs.objects.filter(email="john.doe@example.com").first()
         self.assertIsNotNone(contact_us)
@@ -124,8 +215,11 @@ class ContactUsViewTests(TestCase):
         # Check that a success message is added to the messages framework
         messages = list(get_messages(response.wsgi_request))
         self.assertGreater(len(messages), 0)
-        self.assertEqual(str(messages[0]), "Your query has been submitted. Our representative will contact you shortly.")
-        
+        self.assertEqual(
+            str(messages[0]),
+            "Your query has been submitted. Our representative will contact you shortly.",
+        )
+
         # Check the redirection after form submission
         self.assertRedirects(response, self.url)
 
@@ -135,7 +229,7 @@ class ContactUsViewTests(TestCase):
             "name": "John Doe",
             # Email that matches the user created in setUp()
             "email": "testuser@example.com",
-            "query": "This is a test query."
+            "query": "This is a test query.",
         }
 
         response = self.client.post(self.url, data=valid_data)
