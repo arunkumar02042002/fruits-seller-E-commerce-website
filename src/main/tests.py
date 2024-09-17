@@ -75,15 +75,11 @@ class TestimonialModelTests(TestCase):
         self.user = User.objects.create_user(
             username="testuser", email="testuser@example.com", password="password123"
         )
-        self.photo = SimpleUploadedFile(
-            name="test_image.jpg", content=b"", content_type="image/jpeg"
-        )
 
     def test_create_testimonial(self):
         """Test creating a testimonial with valid data."""
         testimonial = Testimonial.objects.create(
             user=self.user,
-            photo=self.photo,
             name="John Doe",
             email="john.doe@example.com",
             profession="Software Engineer",
@@ -99,7 +95,6 @@ class TestimonialModelTests(TestCase):
         """Test the string representation of the Testimonial model."""
         testimonial = Testimonial.objects.create(
             user=self.user,
-            photo=self.photo,
             name="John Doe",
             email="john.doe@example.com",
             profession="Software Engineer",
@@ -111,7 +106,6 @@ class TestimonialModelTests(TestCase):
     def test_create_testimonial_without_user(self):
         """Test creating a testimonial without a user (null user field)."""
         testimonial = Testimonial.objects.create(
-            photo=self.photo,
             name="Jane Smith",
             email="jane.smith@example.com",
             profession="Data Scientist",
@@ -125,7 +119,6 @@ class TestimonialModelTests(TestCase):
         """Test creating a testimonial without an email (blank email field)."""
         testimonial = Testimonial.objects.create(
             user=self.user,
-            photo=self.photo,
             name="Michael Brown",
             profession="Product Manager",
             feedback="Loved the product!",
@@ -139,7 +132,6 @@ class TestimonialModelTests(TestCase):
         """Test updating a testimonial's feedback and rating."""
         testimonial = Testimonial.objects.create(
             user=self.user,
-            photo=self.photo,
             name="Sam Williams",
             email="sam.williams@example.com",
             profession="HR Manager",

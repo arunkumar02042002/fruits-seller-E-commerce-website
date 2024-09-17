@@ -1,3 +1,4 @@
+from PIL import Image
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -44,7 +45,6 @@ class Testimonial(models.Model):
         blank=True,
         related_name="testimonials",
     )
-    photo = models.ImageField(upload_to="main/testimonials")
     name = models.CharField(_("name"), max_length=255, db_index=True)
     email = models.EmailField(_("email address"), db_index=True, null=True, blank=True)
     profession = models.CharField(max_length=100)
