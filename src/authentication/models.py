@@ -138,4 +138,4 @@ class Profile(models.Model):
         return f"{self.address}, {self.city}, {self.state}, {self.country}, {self.pin_code}"
 
     def __str__(self):
-        return f"{self.user.email}_{self.role}"
+        return f"{self.user.email}_{self.user.role}"
