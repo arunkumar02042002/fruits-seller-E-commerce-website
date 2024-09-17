@@ -133,10 +133,14 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = "staticfiles/"
 
+MEDIA_URL = "media/"
+MEDIA_ROOT = "media/"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_PORT = config("EMAIL_PORT")
