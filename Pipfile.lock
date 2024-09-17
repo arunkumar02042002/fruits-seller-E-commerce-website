@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "157b7690377df4f87cb0b7deaf29b3d90fb865bac5f41dcd4a0c284fe28f54cb"
+            "sha256": "10950ed3e8a2318dc36cafe634f62ca6d152f156d2e82d70ef3df0a2da8ea262"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -78,6 +78,15 @@
             "markers": "python_version >= '3.10'",
             "version": "==5.1.1"
         },
+        "faker": {
+            "hashes": [
+                "sha256:4294d169255a045990720d6f3fa4134b764a4cdf46ef0d3c7553d2506f1adaa1",
+                "sha256:e59c01d1e8b8e20a83255ab8232c143cb2af3b4f5ab6a3f5ce495f385ad8ab4c"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==28.4.1"
+        },
         "mypy-extensions": {
             "hashes": [
                 "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d",
@@ -110,6 +119,14 @@
             "markers": "python_version >= '3.8'",
             "version": "==4.3.3"
         },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3",
+                "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==2.9.0.post0"
+        },
         "python-decouple": {
             "hashes": [
                 "sha256:ba6e2657d4f376ecc46f77a3a615e058d93ba5e465c01bbe57289bfb7cce680f",
@@ -117,6 +134,14 @@
             ],
             "index": "pypi",
             "version": "==3.8"
+        },
+        "six": {
+            "hashes": [
+                "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926",
+                "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==1.16.0"
         },
         "sqlparse": {
             "hashes": [
