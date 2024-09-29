@@ -130,11 +130,17 @@ class SignUpViewTests(TestCase):
             "email": "test@example.com",
             "password1": "testpassword123",
             "password2": "testpassword123",
+            "first_name": "test",
+            "last_name": "user",
         }
         response = self.client.post(self.signup_url, data=form_data)
         # Ensure the user is created
         user = User.objects.filter(email="test@example.com").first()
         self.assertIsNotNone(user)
+        self.assertEqual(user.email, "test@example.com")
+        self.assertEqual(user.first_name, "test")
+        self.assertEqual(user.last_name, "user")
+        self.assertTrue(user.check_password("testpassword123"))
 
         # Check that an email was sent
         mock_send_mail.assert_called_once()
@@ -155,6 +161,8 @@ class SignUpViewTests(TestCase):
             "password1": "testpassword123",
             "password2": "testpassword123",
             "email": "test@example.com",
+            "first_name":"test",
+            "last_name":"user"
         }
         response = self.client.post(self.signup_url, data=form_data)
 

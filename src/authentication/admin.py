@@ -12,10 +12,11 @@ class CustomUserAdmin(UserAdmin):
         "is_staff",
         "is_superuser",
         "is_active",
+        "date_joined",
     )
     list_filter = ("role", "is_staff", "is_active", "is_superuser")
     fieldsets = (
-        (None, {"fields": ("email", "phone", "name", "type", "password")}),
+        (None, {"fields": ("email", "first_name", "last_name", "role", "password")}),
         (
             "Permissions",
             {
@@ -48,7 +49,10 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
     search_fields = ("email",)
-    ordering = ("email",)
+    ordering = (
+        "-date_joined",
+        "email",
+    )
 
 
 # Register your models here.

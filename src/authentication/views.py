@@ -32,6 +32,8 @@ class SignUpView(View, TemplateResponseMixin):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
+        email = request.POST.get('email')
+        User.objects.filter(email=email, is_active=False).delete()
         if form.is_valid() is False:
             return self.render_to_response(context={"form": form})
 
