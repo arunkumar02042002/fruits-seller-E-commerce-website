@@ -1,210 +1,92 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
-
-{% block title %}Fruitables | SignUp{% endblock %}
+{% block title %}FruitsTables | Contact Us{% endblock title %}
 
 {% block css %}
 <style>
-    input{
-        color:#022255 !important;
-    }
-    input[type=email]:focus,
-    input[type=password]:focus,
-    input[type=text]:focus{
-        box-shadow: 0 0 5px rgba(246, 8, 110,0.8);
-        border: 1px solid rgba(246f, 8, 110,0.8);
-    }
-    .form-container{
-        width: 100%;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .form-horizontal {
-        width: 320px;
-        background-color: #ffffff;
-        padding: 25px 38px;
-        border-radius: 12px;
-        box-shadow: 2px 2px 15px rgba(0,0,0,0.5);
-    }
-    .control-label {
-        text-align: left !important;
-        padding-bottom: 4px;
-    }
-    .progress {
-        height: 3px !important;
-    }
-    .input-div {
+    .hero-section {
         position: relative;
     }
-    .show-pass{
+
+    .hero-section::before {
+        content: '';
         position: absolute;
-        top: 8px;
-        right: 5%;
-    }
-    .progress-bar-danger {
-        background-color: #e90f10;
-    }
-    .progress-bar-warning{
-        background-color: #ffad00;
-    }
-    .progress-bar-success{
-        background-color: #02b502;
-    }
-    .login-btn{
-        width: 100% !important;
-        background-image: linear-gradient(to right, #f6086e , #ff133a) !important;
-        font-size: 18px;
-        color: #fff;
-        margin: 5px auto;
-        padding: 4px 0;
-    }
-    .login-btn:hover{
-        background-image: linear-gradient(to right, rgba(255, 0, 111, 0.8) , rgba(247, 2, 43, 0.8)) !important;
-        color: #fff !important;
-    }
-    .fa-eye{
-        color: #022255;
-        cursor: pointer;
-    }
-    .ex-account p a{
-        color: #f6086e;
-        text-decoration: underline;
-    }
-    .fa-circle{
-        font-size: 6px;  
-    }
-    .fa-check{
-        color: #02b502;
-    }
-    .mt-10 {
-        margin-top: 5rem !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("{% static 'img/hero-img-4.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
     }
 
-    .errorlist li{
-        color: red;
-    }
-
-    #match-password-message {
-        color: red;
-    }
 
 </style>
 {% endblock css %}
 
 {% block content %}
-<div class="form-container pt-5 mt-10">
 
-    <div class="form-horizontal">
-        <form method="POST" id="signUpForm" action="{% url 'signup' %}">
-            <h1>SignUp</h1>
-            {{ form.non_field_errors }}
-            <fieldset>
-                {% csrf_token %}
-                <!-- Email input-->
-                <div class="form-group">
-                    {{ form.email.errors }}
-                    <label class="col-md-12 control-label" for="textinput">
-                        Email
-                    </label>
-
-                    <div class="col-md-12">
-                        {{ form.email|addclass:'form-control'|addplaceholder:'Enter your email address'}}
-                    </div>
-                    {{ form.email.help_text }}
-                </div>
-
-                <div class="form-group">
-                    <ul class="errorlist" id="password1-errorlist"></ul>
-                    {{ form.password1.errors }}
-                    <label class="col-md-12 control-label" for="passwordinput">
-                        Password
-                    </label>
-                    <div class="col-md-12 input-div">
-                        {{ form.password1|addclass:'form-control'|addplaceholder:'Enter a strong password'}}
-                        <span class="show-pass" data-id="id_password1" onclick="toggle(this)">
-                            <i class="far fa-eye" onclick="hideAndShowEye(this)"></i>
-                        </span>
-                        <div id="popover-password">
-                            <p><span id="result"></span></p>
-                            <div class="progress">
-                                <div id="password-strength" 
-                                    class="progress-bar" 
-                                    role="progressbar" 
-                                    aria-valuenow="40" 
-                                    aria-valuemin="0" 
-                                    aria-valuemax="100" 
-                                    style="width:0%">
-                                </div>
+<!-- Testimonial Form Start -->
+<div class="container-fluid contact" style="margin-top: 150px !important;">
+    <div class="container py-5">
+        <div class="p-5 hero-section rounded">
+            <h1 style="text-align: center; color: white;">Registration Form 🍒</h1>
+            <div class="row g-4">
+                <div class="col-lg-12">
+                    <form method="POST" id="signUpForm">
+                        {% csrf_token %}
+                        <div class="row g-4 my-1">
+                            <div class="col-lg-12 col-12">
+                                {{form.email|addclass:"form-control py-3 my-1"|addplaceholder:"Your Email"}}
+                                {{form.email.errors}}
+                                <ul id="email-errorlist" class="errorlist"></ul>
                             </div>
-                            <ul class="list-unstyled">
-                                <li class="">
-                                    <span class="low-upper-case">
-                                        <i class="fas fa-circle" aria-hidden="true"></i>
-                                        &nbsp;Lowercase &amp; Uppercase
-                                    </span>
-                                </li>
-                                <li class="">
-                                    <span class="one-number">
-                                        <i class="fas fa-circle" aria-hidden="true"></i>
-                                        &nbsp;Number (0-9)
-                                    </span> 
-                                </li>
-                                <li class="">
-                                    <span class="one-special-char">
-                                        <i class="fas fa-circle" aria-hidden="true"></i>
-                                        &nbsp;Special Character (!@#$%^&*)
-                                    </span>
-                                </li>
-                                <li class="">
-                                    <span class="eight-character">
-                                        <i class="fas fa-circle" aria-hidden="true"></i>
-                                        &nbsp;Atleast 8 Character
-                                    </span>
-                                </li>
-                            </ul>
                         </div>
-                    </div>
+                        <div class="row g-4 my-1">
+                            <div class="col-lg-6 col-12">
+                                {{form.first_name|addclass:"form-control py-3 my-1"|addplaceholder:"Your First Name"}}
+                                {{form.first_name.errors}}
+                            </div>
+                            <div class="col-lg-6 col-12">
+                                {{form.last_name|addclass:"form-control py-3 my-1"|addplaceholder:"Your Last Name"}}
+                                {{form.last_name.errors}}
+                            </div>
+                        </div>
+                        <div class="row g-4 my-1">
+                            <div class="col-lg-6 col-12 input-div">
+                                {{form.password1|addclass:"form-control py-3 my-1"|addplaceholder:"Your Password"}}
+                                {{form.password1.errors}}
+                                <span class="show-pass" data-id="id_password1" onclick="toggle(this)">
+                                    <i class="far fa-eye" onclick="hideAndShowEye(this)"></i>
+                                </span>
+                                <ul>
+                                    <li><small>Password must contain uppercase, lowercase, and special character.</small></li>
+                                    <li><small>Password length must be greater than 7.</small></li>
+                                </ul>
+                                <ul id="password1-errorlist" class="errorlist"></ul>
+                            </div>
+                            <div class="col-lg-6 col-12 input-div">
+                                {{form.password2|addclass:"form-control py-3 my-1"|addplaceholder:"Confirm Password"}}
+                                {{form.password2.errors}}
+                                <span class="show-pass" data-id="id_password2" onclick="toggle(this)">
+                                    <i class="far fa-eye" onclick="hideAndShowEye(this)"></i>
+                                </span>
+                                <ul id="password2-errorlist" class="errorlist"></ul>
+                            </div>
+                        </div>
+                        <button class="w-100 btn form-control border-secondary py-3 my-3 bg-white text-primary" disabled id = "signUpBtn" type="submit">Submit</button>
+                    </form>
                 </div>
-
-                <div class="form-group">
-                    <ul class="errorlist" id="password2-errorlist"></ul>
-                    {{ form.password2.errors }}
-                    <label class="col-md-12 control-label" for="passwordinput">
-                        Confirm Password
-                    </label>
-                    <div class="col-md-12 input-div">
-                        {{ form.password2|addclass:'form-control'|addplaceholder:'Enter a strong password'}}
-                        <span class="show-pass" data-id="id_password2" onclick="toggle(this)">
-                            <i class="far fa-eye" onclick="hideAndShowEye(this)"></i>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Button -->
-                <div class="form-group">
-                    <button type="submit" id="signUpBtn" disabled class="btn login-btn btn-block" button="">
-                        Create Account
-                    </button>    
-                </div>
-            </fieldset>
-        </form>
-
-        <div class="ex-account text-center"></div>
-            <p>Already have an account? Signin 
-                <a href="/">here</a>
-            </p>
-            <div class="divider"></div>
+            </div>
         </div>
-    </div>  
+    </div>
 </div>
 
 {% endblock content %}
 
 {% block js %}
-<script src="{% static 'js/signup.js' %}"></script>
-
+    <script src="{% static 'js/signup.js' %}"></script>
 {% endblock js %}
