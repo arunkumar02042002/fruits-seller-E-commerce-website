@@ -161,8 +161,8 @@ class SignUpViewTests(TestCase):
             "password1": "testpassword123",
             "password2": "testpassword123",
             "email": "test@example.com",
-            "first_name":"test",
-            "last_name":"user"
+            "first_name": "test",
+            "last_name": "user",
         }
         response = self.client.post(self.signup_url, data=form_data)
 
