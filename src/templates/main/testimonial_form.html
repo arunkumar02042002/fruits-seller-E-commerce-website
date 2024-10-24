@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}FruitsTables | Contact Us{% endblock title %}
+
+{% block css %}
+{% endblock css %}
+
+{% block content %}
+{% include "includes/single_page_header.html" %}
+{% include "includes/testimonials.html" %}
+
+
+{% if user.is_authenticated and user.role == 'ADMIN' %}
+<!-- Testimonial Form Start -->
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h1>Add Testimonials</h1>
+            <div class="row g-4">
+                <div class="col-lg-12">
+                    <form action="{% url 'testimonial-add' %}" method="POST" id="testimonialAddForm">
+                        {% csrf_token %}
+
+                        <div class="row g-4 my-3">
+                            <div class="col-lg-6 col-12">
+                                {{ form.name.errors }}
+                                {{ form.name|addclass:"form-control py-3"|addplaceholder:"Your Good Name"}}
+                            </div>
+                            <div class="col-lg-6 col-12">
+                                {{ form.email.errors }}
+                                {{ form.email|addclass:"form-control py-3"|addplaceholder:"Your Email" }}
+                            </div>
+                        </div>
+                        <div class="row g-4 my-3">
+                            <div class="col-lg-6 col-12">
+                                {{ form.profession.errors }}
+                                {{ form.profession|addclass:"form-control py-3"|addplaceholder:"Your Profession"}}
+                            </div>
+                            <div class="col-lg-6 col-12">
+                                {{ form.rating.errors }}
+                                <div class="row g-4">
+                                    <div class="col-2 text-start my-auto">Ratings:</div>
+                                    <div class="col-10">{{ form.rating|addclass:"form-control py-3" }}</div>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="row g-4 my-3">
+                            <div class="col-12">
+                                {{ form.feedback.errors }}
+                                {{ form.feedback|addclass:"form-control py-3"|addplaceholder:"Your Feeback" }}
+                            </div>
+                        </div>
+
+                        <button class="w-100 btn form-control border-secondary py-3 bg-white text-primary " type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Testimonial Form End -->
+{% endif %}
+
+{% endblock content %}
+
+{% block js %}
+<script>
+    let testimonialsLink = document.getElementById("testimonials-link");
+    testimonialsLink.classList.add("text-white");
+</script>
+{% endblock js %}

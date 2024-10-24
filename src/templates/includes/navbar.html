@@ -16,7 +16,7 @@
     </div>
     <div class="container px-0">
         <nav class="navbar navbar-light bg-white navbar-expand-xl">
-            <a href="index.html" class="navbar-brand"><h1 class="text-primary display-6">Fruitables</h1></a>
+            <a href="{% url 'home' %}" class="navbar-brand"><h1 class="text-primary display-6">Fruitables</h1></a>
             <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars text-primary"></span>
             </button>
@@ -30,7 +30,7 @@
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             <a href="cart.html" class="dropdown-item">Cart</a>
                             <a href="chackout.html" class="dropdown-item">Chackout</a>
-                            <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                            <a href="{% url 'testimonials' %}" class="dropdown-item">Testimonial</a>
                             <a href="404.html" class="dropdown-item">404 Page</a>
                         </div>
                     </div>
