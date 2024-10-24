@@ -134,7 +134,7 @@
             <!-- Button -->
             
             <div class="form-group">
-                <button type="submit" class="btn w-100 login-btn btn-block">
+                <button type="submit" id="loginBtn" class="btn w-100 login-btn btn-block">
                     Login
                 </button>
             </div>
@@ -150,4 +150,12 @@
 {% endblock content %}
 
 {% block js %}
+<script>
+    let loginForm =document.getElementById("loginUserForm");
+    let submitBtn = document.querySelector("#loginBtn");
+
+    loginForm.addEventListener("submit", () => {
+        submitBtn.setAttribute("disabled", "true");
+    })
+</script>
 {% endblock js %}

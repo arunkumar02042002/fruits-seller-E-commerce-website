@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}FruitsTables | About Us{% endblock title %}
+
+{% block css %}
+{% endblock css %}
+
+{% block content %}
+{% include "includes/single_page_header.html" %}
+
+<!-- About us -->
+<section class="py-3 mb-2 py-md-5">
+  <div class="container py-5">
+    <div class="row gy-3 gy-md-4 gy-lg-0 align-items-lg-center">
+      <div class="col-12 col-lg-6 col-xl-5">
+        <img
+          class="img-fluid rounded"
+          loading="lazy"
+          src="{% static 'img/hero-img-1.png' %}"
+          alt="About 1"
+        />
+      </div>
+      <div class="col-12 col-lg-6 col-xl-7">
+        <div class="row justify-content-xl-center">
+          <div class="col-12 col-xl-11">
+            <h2 class="mb-3">Who Are We?</h2>
+            <p class="lead fs-4 text-secondary mb-3">
+              At FruitsTables, we are passionate about providing fresh,
+              high-quality fruits, vegetables, and sweet breads to nourish your
+              body and delight your taste buds.
+            </p>
+            <p class="mb-2">
+              Our carefully selected produce comes from trusted sources,
+              ensuring that you receive only the best, whether you're looking
+              for juicy fruits, farm-fresh greens, or delicious breads.
+            </p>
+            <p class="mb-5">
+              We believe in promoting a healthy lifestyle by making wholesome,
+              natural products easily accessible to our customers. With a focus
+              on freshness and quality, FruitsTables is your go-to destination
+              for all your fruit, vegetable, and bread needs.
+            </p>
+            <div class="row gy-4 my-2 gy-md-0 gx-xxl-5X">
+              <div class="col-12 col-md-6">
+                <div class="d-flex">
+                  <div class="me-4 text-primary">
+                    <img
+                      src="{% static 'img/fields-rural.svg' %}"
+                      style="height: 50px; width: auto"
+                    />
+                  </div>
+                  <div>
+                    <h2 class="h4 mb-3">Direct From Fields</h2>
+                    <p class="text-secondary mb-0">
+                      We bring fresh fruits and vegetables from fields to your
+                      basket.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="d-flex">
+                  <div class="me-4 text-primary">
+                    <img
+                      src="{% static 'img/fruits-pearl.svg' %}"
+                      style="height: 50px; width: auto"
+                    />
+                  </div>
+                  <div>
+                    <h2 class="h4 mb-3">100% Fresh</h2>
+                    <p class="text-secondary mb-0">
+                      We are committed to bring fresh fruits.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- About us End -->
+
+{% include "includes/testimonials.html" %}
+
+{% endblock content %}
+
+{% block js %}
+<script>
+    let aboutLink = document.getElementById("about-link");
+    aboutLink.classList.add("text-white");
+</script>
+{% endblock js %}

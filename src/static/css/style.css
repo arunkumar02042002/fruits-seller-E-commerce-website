@@ -499,3 +499,57 @@
     line-height: 35px;
 }
 /*** Footer End ***/
+
+.errorlist li{
+    color: var(--bs-danger);
+    text-shadow: 0 0 3px #FF0000;
+}
+
+.input-div {
+    position: relative;
+}
+.show-pass{
+    position: absolute;
+    top: 20px;
+    right: 8%;
+}
+
+.progress {
+    height: 3px !important;
+}
+.progress-bar-danger {
+    background-color: #e90f10;
+}
+.progress-bar-warning{
+    background-color: #ffad00;
+}
+.progress-bar-success{
+    background-color: #02b502;
+}
+
+.fa-eye{
+    color: #022255;
+    cursor: pointer;
+}
+.ex-account p a{
+    color: #f6086e;
+    text-decoration: underline;
+}
+.fa-circle{
+    font-size: 6px;  
+}
+.fa-check{
+    color: #02b502;
+}
+.mt-10 {
+    margin-top: 5rem !important;
+}
+
+#match-password-message {
+    background: var(--bs-secondary);
+    color: var(--bs-white);
+}
+
+.d-none{
+    display: none;
+}

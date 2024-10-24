@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}FruitsTables | Contact Us{% endblock title %}
+
+{% block css %}
+{% endblock css %}
+
+{% block content %}
+{% include "includes/single_page_header.html" %}
+
+<!-- Contact Start -->
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="text-center mx-auto" style="max-width: 700px;">
+                        <h1 class="text-primary">Get in touch</h1>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="h-100 rounded">
+                        <iframe class="rounded w-100" 
+                        style="height: 400px;" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d224345.83936805512!2d77.0688997!3d28.5272803!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d026687c1532b%3A0xb06e10b8675fd5fa!2sNew%20Delhi%2C%20Delhi%2C%20India!5e0!3m2!1sen!2sbd!4v1694268158885!5m2!1sen!2sbd" 
+                        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <form action="{% url 'contact' %}" method="POST" id="contactUsForm">
+
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+
+                        <div class="w-100 border-0 py-1 mb-4">
+                            {{form.name.errors}}
+                            {{form.name|addclass:"form-control py-3"|addplaceholder:"Your Name"}}
+                        </div>
+
+                        <div class="w-100 border-0 mb-4">
+                            {{form.email.errors}}
+                            {{form.email|addclass:"form-control py-3"|addplaceholder:"Your Email"}}
+                        </div>
+
+                        <div class="w-100 border-0 mb-4">
+                            {{form.query.errors}}
+                            {{form.query|addclass:"form-control py-3"|addplaceholder:"Your Message"}}
+                        </div>
+                        <button class="w-100 btn form-control border-secondary py-3 bg-white text-primary " type="submit">Submit</button>
+                    </form>
+                </div>
+                <div class="col-lg-5">
+                    <div class="d-flex p-4 rounded mb-4 bg-white">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary me-4"></i>
+                        <div>
+                            <h4>Address</h4>
+                            <p class="mb-2">New Delhi, India</p>
+                        </div>
+                    </div>
+                    <div class="d-flex p-4 rounded mb-4 bg-white">
+                        <i class="fas fa-envelope fa-2x text-primary me-4"></i>
+                        <div>
+                            <h4>Mail Us</h4>
+                            <p class="mb-2">arun.fruitstables@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="d-flex p-4 rounded bg-white">
+                        <i class="fab fa-instagram fa-2x text-primary me-4"></i>
+                        <div>
+                            <h4>Instagram</h4>
+                            <a class="mb-2" href="https://www.instagram.com/bhaiarunbihari">Arun Kumar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
+
+{% endblock content %}
+
+{% block js %}
+<script>
+    let contactLink = document.getElementById("contact-link");
+    contactLink.classList.add("text-white");
+</script>
+{% endblock js %}
