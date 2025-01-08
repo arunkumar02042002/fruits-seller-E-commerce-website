@@ -25,10 +25,12 @@ class ProductListViewTest(TestCase):
 
         response = self.client.get(self.url)
         data = response.data
-
+        
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["message"], "Products fetched successfully.")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data["results"]), 2)
-        self.assertEqual(data['results'][0]['name'], "Organic Bananas")
+        self.assertEqual(len(data["payload"]["results"]), 2)
+        self.assertEqual(data["payload"]["results"][0]["name"], "Organic Bananas")
     
     def test_product_list_view_pagination(self):
         """Test pagination."""
@@ -38,7 +40,7 @@ class ProductListViewTest(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 9)
+        self.assertEqual(len(response.data["payload"]["results"]), 9)
 
     def test_product_list_view_ordering(self):
         """Test product ordering"""
@@ -54,38 +56,38 @@ class ProductListViewTest(TestCase):
 
         response = self.client.get(self.url, {"ordering": "price"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Cheap Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Cheap Product")
 
         response = self.client.get(self.url, {"ordering": "-price"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Expensive Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Expensive Product")
 
         response = self.client.get(self.url, {"ordering": "-created_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Cheap Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Cheap Product")
 
         response = self.client.get(self.url, {"ordering": "created_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Expensive Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Expensive Product")
 
         response = self.client.get(self.url, {"ordering": "discount_in_percent"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Cheap Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Cheap Product")
 
         response = self.client.get(self.url, {"ordering": "-discount_in_percent"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Expensive Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Expensive Product")
 
         p2.discount_in_percent = 13.00
         p2.save()
 
         response = self.client.get(self.url, {"ordering": "updated_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Expensive Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Expensive Product")
 
         response = self.client.get(self.url, {"ordering": "-updated_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"][0]["name"], "Cheap Product")
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Cheap Product")
 
     def test_product_search(self):
         tags = [
@@ -106,17 +108,17 @@ class ProductListViewTest(TestCase):
         # Category Search
         response = self.client.get(self.url, {'search':'vege'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         # Name Search
         response = self.client.get(self.url, {'search':'fresh'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 3)
+        self.assertEqual(len(response.data["payload"]["results"]), 3)
 
         # Tags title search
         response = self.client.get(self.url, {'search':'sweet'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
 
     def test_product_category_filtering(self):
         """Test category wise filtering."""
@@ -130,8 +132,8 @@ class ProductListViewTest(TestCase):
         response = self.client.get(self.url, {"category": "FRUIT"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
     def test_product_name_filter(self):
         """Test filter by product name."""
@@ -145,8 +147,8 @@ class ProductListViewTest(TestCase):
         response = self.client.get(self.url, {"name": "apple"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
     def test_product_sub_category_filter(self):
         """Test filter by product name."""
@@ -162,8 +164,8 @@ class ProductListViewTest(TestCase):
         response = self.client.get(self.url, {"sub_category": "root"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Carrots")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Carrots")
 
     def test_product_tag_title_filter(self):
         tags = [
@@ -183,17 +185,17 @@ class ProductListViewTest(TestCase):
 
         response = self.client.get(self.url, {"tags": ["healthy", "sweet"]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
         response = self.client.get(self.url, {"tags": "healthy"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         response = self.client.get(self.url, {"tags": ["sweet"]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
     def test_product_price_filter(self):
         ProductFactory(name="Fresh Apples", price=50)
@@ -201,29 +203,29 @@ class ProductListViewTest(TestCase):
 
         response = self.client.get(self.url, {'min_price':50})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         response = self.client.get(self.url, {'min_price':100})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Organic Bananas")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Organic Bananas")
 
         response = self.client.get(self.url, {'min_price':101})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 0)
+        self.assertEqual(len(response.data["payload"]["results"]), 0)
 
         response = self.client.get(self.url, {'max_price':100})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         response = self.client.get(self.url, {'max_price':50})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
         response = self.client.get(self.url, {'max_price':49})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 0)
+        self.assertEqual(len(response.data["payload"]["results"]), 0)
 
     def test_product_discount_filter(self):
         ProductFactory(
@@ -235,27 +237,27 @@ class ProductListViewTest(TestCase):
 
         response = self.client.get(self.url, {'min_discount':10})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         response = self.client.get(self.url, {'min_discount':15})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Organic Bananas")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Organic Bananas")
 
         response = self.client.get(self.url, {'min_discount':16})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 0)
+        self.assertEqual(len(response.data["payload"]["results"]), 0)
 
         response = self.client.get(self.url, {'max_discount':15})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(len(response.data["payload"]["results"]), 2)
 
         response = self.client.get(self.url, {'max_discount':10})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["name"], "Fresh Apples")
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+        self.assertEqual(response.data["payload"]["results"][0]["name"], "Fresh Apples")
 
         response = self.client.get(self.url, {'max_discount':9})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 0)
+        self.assertEqual(len(response.data["payload"]["results"]), 0)
 

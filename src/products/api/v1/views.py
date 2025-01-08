@@ -6,6 +6,8 @@ from rest_framework.pagination import PageNumberPagination
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+from common.responses import reponse_200OK
+
 from products.api.v1.filters import ProductFilter
 from products.api.v1.serializers import ProductSerializer
 
@@ -26,7 +28,11 @@ class ProductListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         self.pagination_class.page_size = self.page_size
-        return super().list(request, *args, **kwargs)
+        response = super().list(request, *args, **kwargs)
+        return reponse_200OK(
+            message="Products fetched successfully.",
+            payload=response.data
+        )
 
     def get_queryset(self):
         return Product.objects.filter().prefetch_related("tags")
