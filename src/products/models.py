@@ -1,18 +1,20 @@
+from decimal import Decimal
 import uuid
 
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
 
-from .choices import ProductCategoryChoice
+from common.models import BaseModel
+
+from products.choices import ProductCategoryChoice
+
 
 User = get_user_model()
 
 
-class Tag(models.Model):
+class Tag(BaseModel):
     title = models.CharField(unique=True, max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return "#" + self.title
@@ -26,7 +28,7 @@ class Tag(models.Model):
         return super().save(*args, **kwargs)
 
 
-class Product(models.Model):
+class Product(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -36,29 +38,23 @@ class Product(models.Model):
         max_digits=4,
         decimal_places=2,
         default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        validators=[MinValueValidator(Decimal('0.00')), MaxValueValidator(Decimal('100.00'))],
     )
     price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))]
     )
     image = models.ImageField(
         upload_to="products/product_images", null=True, blank=True
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    admin_user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True
-    )
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
 
     @property
     def discounted_price(self):
-        return self.price - ((self.price / 100) * self.discount_in_percent)
+        return self.price * (1 - self.discount_in_percent/100)
 
     def __str__(self) -> str:
-        return str(self.admin_user_id) + "-" + self.name
+        return self.name
 
     def save(self, *args, **kwargs):
         if self.sub_category:
@@ -66,12 +62,9 @@ class Product(models.Model):
         return super().save(*args, **kwargs)
 
 
-class ProductTag(models.Model):
+class ProductTag(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -81,4 +74,4 @@ class ProductTag(models.Model):
         ]
 
     def __str__(self) -> str:
-        return "Tag-" + str(self.tag_id) + "-product-" + str(self.product_id)
+        return "Tag-" + str(self.tag_uuid) + "-product-" + str(self.product_uuid)
