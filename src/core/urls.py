@@ -25,6 +25,7 @@ urlpatterns = [
     path("authentication/", include("authentication.urls")),
     # API Views
     path("api/v1/authentication/", include("authentication.api.v1.urls")),
+    path("api/v1/products/", include("products.api.v1.urls"))
 ]
 
 if settings.DEBUG is True:
