@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -8,11 +10,32 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from .choices import UserRoleChoices
+from authentication.choices import UserRoleChoices
+
+from common.utils import GlobalVariable
 
 
-# User Manager
 class CustomUserManager(BaseUserManager):
+    """Manager for User Model."""
+    def get_queryset(self):
+        # Return only non-deleted objects
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+    def save(self, instance, *args, **kwargs):
+        """Custom save method to handle created_at and updated_at."""
+        user_id = GlobalVariable.get_val('user_id', None)
+        if not instance.pk:  # If creating a new instance
+            instance.created_by = user_id
+        instance.updated_by = user_id
+        return super(CustomUserManager, self).save(instance, *args, **kwargs)
+
+    def delete(self, instance, *args, **kwargs):
+        """Custom delete method to set deleted_at instead of removing from the database."""
+        user_id = GlobalVariable.get_val('user_id', None)
+        instance.deleted_at = timezone.now()
+        instance.deleted_by = user_id
+        instance.save()
+
     def create_user(self, username, email, password=None, **kwargs):
 
         if not username:
@@ -49,6 +72,12 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
 
     username_validator = UnicodeUsernameValidator()
+
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
 
     username = models.CharField(
         _("username"),
@@ -89,6 +118,43 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Created At'
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Last Updated At'
+    )
+
+    deleted_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name='Deleted At'
+    )
+
+    created_by = models.ForeignKey(
+        'User',
+        related_name='created_%(class)s_set',
+        null=True, blank=True,
+        verbose_name='Created By',
+        on_delete=models.SET_NULL
+    )
+    updated_by = models.ForeignKey(
+        'User',
+        related_name='updated_%(class)s_set',
+        null=True, blank=True,
+        verbose_name='Updated By',
+        on_delete=models.SET_NULL
+    )
+    deleted_by = models.ForeignKey(
+        'User',
+        related_name='deleted_%(class)s_set',
+        null=True, blank=True,
+        verbose_name='Deleted By',
+        on_delete=models.SET_NULL
+    )
+
     objects = CustomUserManager()
 
     EMAIL_FIELD = "email"
@@ -109,33 +175,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
-
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-
-    profile_picture = models.ImageField(
-        upload_to="users/profile_pictures", blank=True, null=True
-    )
-    cover_photo = models.ImageField(
-        upload_to="users/cover_photos", blank=True, null=True
-    )
-
-    address = models.CharField(max_length=250, blank=True, null=True)
-    country = models.CharField(max_length=15, blank=True, null=True)
-    state = models.CharField(max_length=15, blank=True, null=True)
-    city = models.CharField(max_length=15, blank=True, null=True)
-    pin_code = models.CharField(max_length=6, blank=True, null=True)
-
-    # To locate user
-    latitude = models.CharField(max_length=20, blank=True, null=True)
-    longitude = models.CharField(max_length=20, blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
-
-    def full_address(self):
-        return f"{self.address}, {self.city}, {self.state}, {self.country}, {self.pin_code}"
-
-    def __str__(self):
-        return f"{self.user.email}_{self.user.role}"

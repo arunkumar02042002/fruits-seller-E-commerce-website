@@ -1,14 +1,17 @@
-# Django Imports
+from unittest.mock import patch
+import uuid
+
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from unittest.mock import patch
 from django.contrib.auth.tokens import default_token_generator
 
-from .models import Profile
-from .tokens import account_activation_token
+from authentication.tokens import account_activation_token
+
+from users.models import Profile
+
 
 User = get_user_model()
 
@@ -30,6 +33,7 @@ class UserModelTest(TestCase):
             last_name="User",
             password="testpassword",
         )
+        self.test_uuid = 'acde070d-8c4c-4f0d-9d8a-162843c10333'
 
     def test_create_user(self):
         self.assertEqual(self.user.email, "test@gmail.com")
@@ -52,42 +56,22 @@ class UserModelTest(TestCase):
         self.assertTrue(self.superuser.is_staff)
         self.assertTrue(self.superuser.is_active)
         self.assertTrue(self.superuser.is_superuser)
+        
+    def test_default_values(self):
+        """Test default values are being populated correctly."""
+        self.assertIsNotNone(self.user.created_at)
+        self.assertIsNotNone(self.user.updated_at)
+        self.assertIsNone(self.user.deleted_at)
+        self.assertIsNone(self.user.created_by)
+        self.assertIsNone(self.user.updated_by)
+        self.assertIsNone(self.user.deleted_by)
 
-
-class PofileModelTest(TestCase):
-    def setUp(self) -> None:
-        self.user = User.objects.create_user(
-            email="test@gmail.com",
-            username="test_user",
-            first_name="Test",
-            last_name="User",
-            password="testpassword",
-        )
-        self.profile = Profile.objects.create(
-            user=self.user,
-            address="test address",
-            country="test country",
-            state="test state",
-            city="test city",
-            pin_code="123456",
-            latitude="123.456",
-            longitude="123.789",
-        )
-
-    def test_create_profile(self):
-        self.assertEqual(self.profile.user, self.user)
-        self.assertEqual(self.profile.address, "test address")
-        self.assertEqual(self.profile.country, "test country")
-        self.assertEqual(self.profile.state, "test state")
-        self.assertEqual(self.profile.city, "test city")
-        self.assertEqual(self.profile.pin_code, "123456")
-        self.assertEqual(self.profile.latitude, "123.456")
-        self.assertEqual(self.profile.longitude, "123.789")
-        self.assertEqual(
-            self.profile.full_address(),
-            "test address, test city, test state, test country, 123456",
-        )
-
+    def test_get_queryset(self):
+        """Test get_queryset only returns non-deleted users."""
+        self.user.delete()
+        active_users = User.objects.all()
+        self.assertNotIn(self.user, active_users)
+        self.assertIn(self.superuser, active_users)
 
 class SignUpViewTests(TestCase):
 
@@ -118,10 +102,6 @@ class SignUpViewTests(TestCase):
         self.assertTemplateUsed(response, "authentication/signup.html")
         self.assertIn("form", response.context)
         self.assertTrue(response.context["form"].errors)
-
-    """
-    The use of @patch allows mocking the send_mail function to either simulate a successful email or an email failure.
-    """
 
     @patch("authentication.views.send_mail")
     def test_post_signup_valid_form_sends_email(self, mock_send_mail):
@@ -156,7 +136,10 @@ class SignUpViewTests(TestCase):
 
     @patch("authentication.views.send_mail", side_effect=Exception("Email error"))
     def test_post_signup_email_send_failure(self, mock_send_mail):
-        """Test that email send failure shows error message and doesn't redirect"""
+        """
+        Test that email send failure shows error message and doesn't redirect.
+        The use of @patch allows mocking the send_mail function to either simulate a successful email or an email failure.
+        """
         form_data = {
             "password1": "testpassword123",
             "password2": "testpassword123",
@@ -252,7 +235,7 @@ class AccountActivateViewTests(TestCase):
 
     def test_invalid_uidb64(self):
         """Test that the view redirects to signup when an invalid uidb64 is used"""
-        invalid_uidb64 = urlsafe_base64_encode(force_bytes(99999))  # Invalid UID
+        invalid_uidb64 = urlsafe_base64_encode(force_bytes(uuid.uuid4()))  # Invalid UID
         response = self.client.get(
             reverse(
                 "activate-account",
@@ -291,7 +274,7 @@ class AccountActivateViewTests(TestCase):
     def test_activation_for_non_existent_user(self):
         """Test that the view handles non-existent users correctly"""
         # Use a non-existent uid
-        non_existent_uidb64 = urlsafe_base64_encode(force_bytes(99999))
+        non_existent_uidb64 = urlsafe_base64_encode(force_bytes(uuid.uuid4()))
         response = self.client.get(
             reverse(
                 "activate-account",

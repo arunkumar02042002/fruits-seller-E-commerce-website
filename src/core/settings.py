@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third-party
     "rest_framework",
+    "django_filters",
     # local
     "authentication",
     "common",
+    "contact",
     "main",
     "orders",
     "products",
@@ -60,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "common.middleware.LogMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -127,6 +130,7 @@ REST_FRAMEWORK = {
         "anon": "250/day",
         "user": "1000/day",
     },
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "EXCEPTION_HANDLER": "common.exception_handler.custom_exception_handler",
 }
 

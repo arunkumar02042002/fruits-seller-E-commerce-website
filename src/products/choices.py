@@ -2,8 +2,8 @@ from django.db import models
 
 
 class ProductCategoryChoice(models.TextChoices):
-    VEGETABLE = "VEGITABLE"
+    VEGETABLE = "VEGETABLE"
     FRUIT = "FRUIT"
-    DRY_FRUIT = "DRY_FRUITS"
+    DRY_FRUIT = "DRY_FRUIT"
     BREAD = "BREAD"
     MEAT = "MEAT"

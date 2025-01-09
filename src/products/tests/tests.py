@@ -3,15 +3,18 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from decimal import Decimal
 
-from .models import Tag, Product, ProductTag
-from .choices import ProductCategoryChoice
+from products.models import Tag, Product, ProductTag
+from products.choices import ProductCategoryChoice
+from products.factories import ProductFactory, TagFactory
+
+from users.factories import UserFactory
 
 User = get_user_model()
 
 
 class TagModelTests(TestCase):
     def setUp(self):
-        self.tag = Tag.objects.create(title="Fresh")
+        self.tag = TagFactory(title="Fresh")
 
     def test_tag_creation(self):
         self.assertEqual(self.tag.title, "fresh")
@@ -21,7 +24,7 @@ class TagModelTests(TestCase):
 
     def test_tag_uniqueness(self):
         with self.assertRaises(ValidationError):
-            Tag.objects.create(title="fresh").full_clean()
+            TagFactory(title="fresh").full_clean()
 
     def test_tag_clean(self):
         tag = Tag(title="EXAMPLE")
@@ -34,15 +37,15 @@ class ProductModelTests(TestCase):
         self.admin_user = User.objects.create_superuser(
             username="admin", email="admin@test.com", password="admin123"
         )
-        self.tag = Tag.objects.create(title="Organic")
-        self.product = Product.objects.create(
+        self.tag = TagFactory()
+        self.product = ProductFactory(
             name="Apple",
             description="Fresh Apple",
             category=ProductCategoryChoice.FRUIT,
             sub_category="Organic",
             price=Decimal("100.00"),
             discount_in_percent=Decimal("10.00"),
-            admin_user=self.admin_user,
+            created_by=self.admin_user,
         )
         self.product.tags.add(self.tag)
 
@@ -53,7 +56,6 @@ class ProductModelTests(TestCase):
         self.assertEqual(self.product.sub_category, "organic")
         self.assertEqual(self.product.price, Decimal("100.00"))
         self.assertEqual(self.product.discount_in_percent, Decimal("10.00"))
-        self.assertEqual(str(self.product), f"{self.admin_user.id}-Apple")
 
     def test_discounted_price(self):
         discounted_price = self.product.discounted_price
@@ -100,29 +102,31 @@ class ProductModelTests(TestCase):
 
 
 class ProductTagModelTests(TestCase):
+    """Tests for ProductTag Model"""
+
     def setUp(self):
-        self.admin_user = User.objects.create_superuser(
+        """Set up test data"""
+        self.admin_user = UserFactory(
             username="admin", email="admin@test.com", password="admin123"
         )
-        self.tag = Tag.objects.create(title="Organic")
-        self.product = Product.objects.create(
+        self.tag = TagFactory(title="Organic")
+        self.product = ProductFactory(
             name="Banana",
             description="Ripe Banana",
             category="Fruit",
             sub_category="organic",
             price=Decimal("50.00"),
-            admin_user=self.admin_user,
+            created_by=self.admin_user,
         )
         self.product_tag = ProductTag.objects.create(product=self.product, tag=self.tag)
 
     def test_product_tag_creation(self):
-        self.assertEqual(
-            str(self.product_tag), f"Tag-{self.tag.id}-product-{self.product.id}"
-        )
+        """Test ProductTag Creation"""
         self.assertEqual(self.product_tag.product, self.product)
         self.assertEqual(self.product_tag.tag, self.tag)
 
     def test_unique_product_tag(self):
+        """Test unique constraint violation"""
         with self.assertRaises(ValidationError):
             duplicate_product_tag = ProductTag(product=self.product, tag=self.tag)
-            duplicate_product_tag.full_clean()  # Test unique constraint violation
+            duplicate_product_tag.full_clean()

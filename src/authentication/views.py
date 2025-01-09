@@ -13,16 +13,17 @@ from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from .tokens import account_activation_token
-from . import forms
-from .models import Profile
+from authentication.tokens import account_activation_token
+from authentication.forms import SignUpForm
+
+from users.models import Profile
 
 User = get_user_model()
 
 
 # Create your views here.
 class SignUpView(View, TemplateResponseMixin):
-    form_class = forms.SignUpForm
+    form_class = SignUpForm
     template_name = "authentication/signup.html"
 
     def get(self, request, *args, **kwargs):
