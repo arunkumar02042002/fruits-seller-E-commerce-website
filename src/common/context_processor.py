@@ -1,4 +1,4 @@
-from main.models import Testimonial
+from testimonials.models import Testimonial
 
 
 def top_testimonials(request):

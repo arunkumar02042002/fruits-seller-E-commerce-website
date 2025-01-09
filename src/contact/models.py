@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from authentication.choices import UserRoleChoices
-
 from common.models import BaseModel
 
 from contact.choices import ContactUsStatusChoice

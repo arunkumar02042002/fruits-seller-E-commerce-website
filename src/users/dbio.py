@@ -12,3 +12,11 @@ class UserDBIO():
         Returns None if no user exists with the given mail.
         """
         return User.objects.filter(email=email).first()
+    
+    @staticmethod
+    def get_user_by_pk(pk):
+        """
+        Get User by email.
+        Returns None if no user exists with the given mail.
+        """
+        return User.objects.filter(pk=pk).first()
