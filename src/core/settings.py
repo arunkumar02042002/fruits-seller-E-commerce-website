@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # local
     "authentication",
     "common",
+    "contact",
     "main",
     "orders",
     "products",
