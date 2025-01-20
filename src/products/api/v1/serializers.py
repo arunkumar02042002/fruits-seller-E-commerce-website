@@ -7,7 +7,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ("title",)
+        fields = ("title", "created_at", "updated_at")
 
 
 class ProductSerializer(serializers.ModelSerializer):

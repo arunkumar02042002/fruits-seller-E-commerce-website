@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "django_filters",
+    "crispy_forms",
     # local
     "authentication",
     "common",
