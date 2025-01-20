@@ -47,12 +47,13 @@ class Product(BaseModel):
         upload_to="products/product_images", null=True, blank=True
     )
     rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.FIVE)
+    is_featured = models.BooleanField(default=False)
 
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
 
     @property
     def discounted_price(self):
-        return self.price * (1 - self.discount_in_percent/100)
+        return round(self.price * (1 - self.discount_in_percent/100), 2)
 
     def __str__(self) -> str:
         return self.name

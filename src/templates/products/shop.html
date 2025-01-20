@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Fruitables - Shop{% endblock title %}
+
+{% block content %}
+<!-- Fruits Shop Start-->
+<div class="container-fluid fruite py-5">
+    <div class="container py-5">
+        <h1 class="mb-4">Fresh fruits shop</h1>
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <div class="row g-4">
+                    <div class="col-xl-3">
+                        <div class="input-group w-100 mx-auto d-flex">
+                            <input type="search" id="search-keyword" class="form-control p-3" placeholder="Search..." aria-describedby="search-icon-1">
+                        </div>
+                    </div>
+                    <div class="col-6"></div>
+                    <div class="col-xl-3">
+                        <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
+                            <label for="ordering">Default Sorting:</label>
+                            <select id="ordering" name="orderinglist" class="border-0 form-select-sm bg-light me-3" form="fruitform">
+                                <option value="">Sorting by None</option>
+                                <option value="price">Price Low to High</option>
+                                <option value="-price">Price High to Low</option>
+                                <option value="discount_in_percent">Discount High to Low</option>
+                                <option value="-discount_in_percent">Discount High to Low</option>
+                                <option value="created_at">Newer First</option>
+                                <option value="-created_at">Older First</option>
+                                <option value="updated_at">Recently Updated First</option>
+                                <option value="-updated_at">Recently Updated Last</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-3">
+                        <div class="row g-4">
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <h4>Categories</h4>
+                                    <ul class="list-unstyled fruite-categorie" id="category-list">
+                                        <li>
+                                            <div class="d-flex justify-content-between fruite-name">
+                                                <a href="#"><i class="fa-solid fa-pepper-hot me-2"></i>VEGETABLES<span class="ms-2">(5)</span></a>
+                                                <input type="radio" class="ms-2 pointer" id="Category-1" name="category" value="VEGETABLE">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="d-flex justify-content-between fruite-name">
+                                                <a href="#"><i class="fas fa-apple-alt me-2"></i>FRUITS<span class="ms-2">(5)</span></a>
+                                                <input type="radio" class="ms-2 pointer" id="Category-2" name="category" value="FRUIT">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="d-flex justify-content-between fruite-name">
+                                                <a href="#"><i class="fas fa-bread-slice me-2"></i>BREAD<span class="ms-2">(5)</span></a>
+                                                <input type="radio" class="ms-2 pointer" id="Category-3" name="category" value="BREAD">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="d-flex justify-content-between fruite-name">
+                                                <a href="#"><i class="fa-brands fa-nutritionix me-2"></i>DRY FRUITS<span class="ms-2">(5)</span></a>
+                                                <input type="radio" class="ms-2 pointer" id="Category-4" name="category" value="DRY_FRUIT">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="d-flex justify-content-between fruite-name">
+                                                <a href="#"><i class="fa-solid fa-fish-fins me-2"></i>MEAT<span class="ms-2">(5)</span></a>
+                                                <input type="radio" class="ms-2 pointer" id="Category-5" name="category" value="MEAT">
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <h4 class="mb-2">Min Price</h4>
+                                    <input type="range" class="form-range w-100" id="minPrice" name="minPrice" min="0" max="500" value="0" oninput="minPriceAmount.value=minPrice.value">
+                                    <output id="minPriceAmount" name="minPriceAmount" min-value="0" max-value="500" for="minPrice">0</output>
+                                </div>
+                                <div class="mb-3">
+                                    <h4 class="mb-2">Max Price</h4>
+                                    <input type="range" class="form-range w-100" id="maxPrice" name="maxPrice" min="0" max="500" value="500" oninput="maxPriceAmount.value=maxPrice.value">
+                                    <output id="maxPriceAmount" name="maxPriceAmount" min-value="0" max-value="500" for="maxPrice">500</output>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 position-relative">
+                                <div class="mb-3">
+                                    <h4>Tags</h4>
+                                    <div class="input-group w-100 mx-auto d-flex">
+                                        <input type="text" id="tag-input" class="form-control p-3" placeholder="Search tags..." aria-describedby="search-icon-1">
+                                        <span class="input-group-text p-3 pointer"><span id="loader" class="loader d-none"></span>
+                                    </div>
+                                    <ul id="tags-list" class=" mt-2 d-flex flex-wrap d-none">
+                                    </ul>
+                                    <div id="selected-tags-list" class="mt-2 d-flex flex-wrap">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3 float-end">
+                                    <button class="btn btn-danger" id="clear-filters-btn">clear</button>
+                                    <button class="btn btn-primary" id="fetch-products-btn">Save</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <h4 class="mb-3">Featured products</h4>
+                                {% for product in featured_products %}
+                                <div class="d-flex align-items-center justify-content-start">
+                                    <div class="rounded me-4" style="width: 100px; height: 100px;">
+                                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="">
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-2">{{ product.name|lower_case }}</h6>
+                                        <div class="d-flex mb-2">
+                                            {% for i in 5|findRange %}
+                                                {% if i <= product.rating %}
+                                                    <i class="fa fa-star text-secondary"></i>  <!-- Filled star -->
+                                                {% else %}
+                                                    <i class="fa fa-star"></i>  <!-- Empty star -->
+                                                {% endif %}
+                                            {% endfor %}
+
+                                        </div>
+                                        <div class="d-flex mb-2">
+                                            <h5 class="fw-bold me-2">&#8377 {{product.discounted_price|roundValue}}</h5>
+                                            <h5 class="text-danger text-decoration-line-through">&#8377 {{ product.price }}</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                <div class="d-flex justify-content-center my-4">
+                                    <a href="#" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">Vew More</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="position-relative">
+                                    <img src="{% static 'img/banner-fruits.jpg' %}" class="img-fluid w-100 rounded" alt="">
+                                    <div class="position-absolute" style="top: 50%; right: 10px; transform: translateY(-50%);">
+                                        <h3 class="text-secondary fw-bold">Fresh <br> Fruits</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="row g-4 justify-content-start" id="product-container">
+                        <!-- Products will go here -->
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="row g-4 justify-content-center">
+                            <div class="col-md-6 col-lg-6 col-xl-4">
+                                <div id="pagination-div" class="pagination d-flex justify-content-center mt-5">
+                                    <button id="start-page" class="rounded">&laquo;</button>
+                                    <button id="previous-page" class="rounded">Prev</button>
+                                    <button id="curr-page" class="rounded">Curr</button>
+                                    <button id="next-page" class="rounded">Next</button>
+                                    <button id="end-page" class="rounded">&raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Fruits Shop End-->
+
+<script src="{% static 'js/shop.js' %}"></script>
+{% endblock content %}

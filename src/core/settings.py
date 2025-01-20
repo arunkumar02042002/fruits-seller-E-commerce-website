@@ -81,6 +81,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.context_processor.top_testimonials",
+                "common.context_processor.featured_products",
             ],
         },
     },

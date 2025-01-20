@@ -22,16 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = (
-            "name",
-            "description",
-            "category",
-            "sub_category",
-            "price",
-            "discount",
-            "discounted_price",
-            "tags",
-            "image",
-            "created_at",
-            "updated_at"
+        exclude = (
+            "created_by", "updated_by",
+            "deleted_at", "deleted_by"
         )
