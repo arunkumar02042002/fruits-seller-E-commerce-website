@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "django_filters",
+    "crispy_forms",
     # local
     "authentication",
     "common",
@@ -80,6 +81,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.context_processor.top_testimonials",
+                "common.context_processor.featured_products",
             ],
         },
     },

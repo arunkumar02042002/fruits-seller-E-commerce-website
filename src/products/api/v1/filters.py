@@ -39,3 +39,12 @@ class ProductFilter(filters.FilterSet):
             "sub_category",
             "tags",
         ]
+
+class TagFilter(filters.FilterSet):
+    title = filters.CharFilter(field_name="title", lookup_expr="istartswith")
+
+    class Meta:
+        model = Tag
+        fields = [
+            "title",
+        ]

@@ -16,7 +16,15 @@ def addclass(value, token):
     value.field.widget.attrs["class"] = token
     return value
 
+def findRange(value):
+    return range(value)
+
+def roundValue(value):
+    return round(value, 2)
+
 
 register.filter(addplaceholder)
 register.filter(lower_case)
 register.filter(addclass)
+register.filter(findRange)
+register.filter(roundValue)
