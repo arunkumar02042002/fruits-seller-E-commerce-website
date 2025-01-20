@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 
 from common.models import BaseModel
 
-from products.choices import ProductCategoryChoice
+from products.choices import ProductCategoryChoice, RatingChoices
 
 
 User = get_user_model()
@@ -46,6 +46,7 @@ class Product(BaseModel):
     image = models.ImageField(
         upload_to="products/product_images", null=True, blank=True
     )
+    rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.FIVE)
 
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
 
