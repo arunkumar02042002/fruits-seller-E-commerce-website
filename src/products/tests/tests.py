@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from decimal import Decimal
 
 from products.models import Tag, Product, ProductTag
-from products.choices import ProductCategoryChoice
+from products.choices import ProductCategoryChoice, RatingChoices
 from products.factories import ProductFactory, TagFactory
 
 from users.factories import UserFactory
@@ -45,6 +45,7 @@ class ProductModelTests(TestCase):
             sub_category="Organic",
             price=Decimal("100.00"),
             discount_in_percent=Decimal("10.00"),
+            rating=RatingChoices.FOUR,
             created_by=self.admin_user,
         )
         self.product.tags.add(self.tag)
@@ -56,6 +57,7 @@ class ProductModelTests(TestCase):
         self.assertEqual(self.product.sub_category, "organic")
         self.assertEqual(self.product.price, Decimal("100.00"))
         self.assertEqual(self.product.discount_in_percent, Decimal("10.00"))
+        self.assertEqual(self.product.rating, RatingChoices.FOUR)
 
     def test_discounted_price(self):
         discounted_price = self.product.discounted_price
