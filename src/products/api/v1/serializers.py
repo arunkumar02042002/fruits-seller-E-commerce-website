@@ -7,7 +7,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ("title",)
+        fields = ("title", "created_at", "updated_at")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -22,16 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = (
-            "name",
-            "description",
-            "category",
-            "sub_category",
-            "price",
-            "discount",
-            "discounted_price",
-            "tags",
-            "image",
-            "created_at",
-            "updated_at"
+        exclude = (
+            "created_by", "updated_by",
+            "deleted_at", "deleted_by"
         )

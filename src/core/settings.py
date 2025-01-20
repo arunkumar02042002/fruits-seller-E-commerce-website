@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # third-party
     "rest_framework",
     "django_filters",
+    "crispy_forms",
     # local
     "authentication",
     "common",
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "main",
     "orders",
     "products",
+    "testimonials",
     "users",
 ]
 
@@ -79,6 +81,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "common.context_processor.top_testimonials",
+                "common.context_processor.featured_products",
             ],
         },
     },
@@ -145,6 +148,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+TEST_DISCOVER_TOP_LEVEL = BASE_DIR
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

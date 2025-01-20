@@ -41,6 +41,13 @@ class ProductListViewTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 9)
+        self.assertEqual(response.data["payload"]["current"], 1)
+        self.assertEqual(response.data["payload"]["start"], 1)
+        self.assertEqual(response.data["payload"]["next"], 2)
+        self.assertEqual(response.data["payload"]["previous"], None)
+        self.assertEqual(response.data["payload"]["last"], 2)
+        self.assertEqual(response.data["payload"]["count"], 12)
+
 
     def test_product_list_view_ordering(self):
         """Test product ordering"""
@@ -90,23 +97,28 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.data["payload"]["results"][0]["name"], "Cheap Product")
 
     def test_product_search(self):
-        tags = [
-            TagFactory(title='healthy'), TagFactory(title='sweet')
-        ]
         ProductFactory(
             name="Fresh Apples", category=ProductCategoryChoice.FRUIT,
-            tags = [tags[0], tags[1]]
+            sub_category='Citrus',
+            description="Fresh Apples are healthy and sweet."
         )
         ProductFactory(
             name="Fresh Carrots", category=ProductCategoryChoice.VEGETABLE,
-            tags = [tags[0]]
+            sub_category='Root Vegetable',
+            description="Fresh Carrots are healthy."
         )
         ProductFactory(
-            name="Fresh Brinjal", category=ProductCategoryChoice.VEGETABLE
+            name="Fresh Brinjal", category=ProductCategoryChoice.VEGETABLE,
+            sub_category='Fruit Vegetable',
+            description="Fresh Brinjal is a healthy vegetable."
         )
 
-        # Category Search
-        response = self.client.get(self.url, {'search':'vege'})
+        # Sub Category Search
+        response = self.client.get(self.url, {'search':'root'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+
+        response = self.client.get(self.url, {'search':'vegetable'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 2)
 
@@ -115,7 +127,11 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 3)
 
-        # Tags title search
+        response = self.client.get(self.url, {'search':'brinj'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["results"]), 1)
+
+        # Description Search
         response = self.client.get(self.url, {'search':'sweet'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 1)
@@ -261,3 +277,65 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 0)
 
+
+class TagListView(TestCase):
+    """Test Tag List View."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse("tags")
+    
+    def test_tag_list_view(self):
+        """Test tag listing."""
+        TagFactory(title="healthy")
+        TagFactory(title="sweet")
+
+        response = self.client.get(self.url)
+        data = response.data
+
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["message"], "Tags fetched successfully.")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(data["payload"]["tags"]), 2)
+
+    def test_tag_list_view_ordering(self):
+        """Test tag ordering."""
+        t1 = TagFactory(title="healthy")
+        time.sleep(0.2)
+        t2 = TagFactory(title="sweet")
+
+        response = self.client.get(self.url, {"ordering": "title"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["payload"]["tags"][0]["title"], t1.title)
+
+        response = self.client.get(self.url, {"ordering": "-title"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["payload"]["tags"][0]["title"], t2.title)
+
+        response = self.client.get(self.url, {"ordering": "-created_at"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["payload"]["tags"][0]["title"], t2.title)
+
+        response = self.client.get(self.url, {"ordering": "created_at"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["payload"]["tags"][0]["title"], t1.title)
+
+    def test_tag_search(self):
+        TagFactory(title="healthy")
+        TagFactory(title="sweet")
+
+        response = self.client.get(self.url, {'title':'heal'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["tags"]), 1)
+
+        response = self.client.get(self.url, {'title':'sweet'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["tags"]), 1)
+
+        response = self.client.get(self.url, {'title':'swe'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["tags"]), 1)
+
+        response = self.client.get(self.url, {'title':'sour'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["payload"]["tags"]), 0)

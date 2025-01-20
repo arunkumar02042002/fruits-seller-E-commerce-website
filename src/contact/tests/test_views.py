@@ -21,7 +21,7 @@ class ContactUsViewTests(TestCase):
         """Test that the ContactUsView renders the contact form on GET request."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "main/contact.html")
+        self.assertTemplateUsed(response, "contact/contact.html")
         self.assertIsInstance(response.context["form"], ContactUsForm)
 
     def test_post_invalid_contact_us_form(self):
@@ -30,7 +30,7 @@ class ContactUsViewTests(TestCase):
         # Submitting an empty form
         response = self.client.post(self.url, data={})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "main/contact.html")
+        self.assertTemplateUsed(response, "contact/contact.html")
         form = response.context["form"]
 
         # The form should be invalid

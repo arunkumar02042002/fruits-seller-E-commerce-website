@@ -11,7 +11,7 @@ from users.dbio import UserDBIO
 # Create your views here.
 class ContactUsView(View, TemplateResponseMixin):
     form_class = ContactUsForm
-    template_name = "main/contact.html"
+    template_name = "contact/contact.html"
 
     def get(self, request, *args, **kwargs):
         return self.render_to_response(context={"form": self.form_class()})
