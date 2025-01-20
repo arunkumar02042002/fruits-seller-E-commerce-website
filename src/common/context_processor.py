@@ -47,3 +47,8 @@ def cart_items_count(request):
         count = cart.cart_items.count()
 
     return dict(cart_items_count=count)
+
+def featured_products(request):
+    """Return featured products."""
+    featured_products = Product.objects.filter(is_featured=True).order_by("-created_at")[:3]
+    return dict(featured_products=featured_products)
