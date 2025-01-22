@@ -5,7 +5,7 @@ from factory import Faker, LazyAttribute, Sequence, SubFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyInteger
 
-from users.models import Address, Profile
+from users.models import Address, Cart, CartItem, Profile
 
 
 User = get_user_model()
@@ -57,3 +57,25 @@ class AddressFactory(DjangoModelFactory):
 
     latitude = Faker('latitude')
     longitude = Faker('longitude')
+
+class CartFactory(DjangoModelFactory):
+    """Create Cart instances."""
+
+    class Meta:
+        """Meta class."""
+
+        model = Cart
+
+    profile = SubFactory('users.factories.UserProfileFactory')
+
+class CartItemFactory(DjangoModelFactory):
+    """Create CartItem instances."""
+
+    class Meta:
+        """Meta class."""
+
+        model = CartItem
+
+    cart = SubFactory('users.factories.CartFactory')
+    product = SubFactory('products.factories.ProductFactory')
+    quantity = FuzzyInteger(1, 10)
