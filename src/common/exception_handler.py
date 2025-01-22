@@ -26,6 +26,6 @@ def custom_exception_handler(exc, context):
             "message": response.data.get(
                 "detail", "We are currently unable to process your request."
             ),
-            "payload": {"errors": exc.detail},
+            "payload": {"errors": str(exc)},
         }
     return response
