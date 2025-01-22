@@ -1,7 +1,12 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from users.factories import UserFactory, UserProfileFactory, AddressFactory
+from products.factories import ProductFactory
+
+from users.factories import (
+    AddressFactory, CartFactory, CartItemFactory,
+    UserFactory, UserProfileFactory
+)
 
 User = get_user_model()
 
@@ -65,3 +70,58 @@ class AddressModelTest(TestCase):
         self.assertIsNone(self.address.created_by)
         self.assertIsNone(self.address.updated_by)
         self.assertIsNone(self.address.deleted_by)
+
+class CartModelTest(TestCase):
+    """Test Cart Model."""
+
+    def setUp(self):
+        """Prepare data for tests."""
+        self.profile = UserProfileFactory()
+        self.cart = CartFactory(
+            profile = self.profile,
+            ip_address="124.0.0.220"
+        )
+    
+    def test_create_cart(self):
+        """Test cart creation."""
+        self.assertEqual(self.cart.profile, self.profile)
+        self.assertEqual(self.cart.ip_address, "124.0.0.220")
+        self.assertIsNotNone(self.cart.created_at)
+        self.assertIsNotNone(self.cart.updated_at)
+        self.assertIsNone(self.cart.deleted_at)
+        self.assertIsNone(self.cart.created_by)
+        self.assertIsNone(self.cart.updated_by)
+        self.assertIsNone(self.cart.deleted_by)
+    
+class CartItemModelTest(TestCase):
+    """Test CartItem Model."""
+
+    def setUp(self):
+        """Prepare data for tests."""
+        self.cart = CartFactory()
+        self.product = ProductFactory()
+        self.cart_item = CartItemFactory(
+            cart = self.cart,
+            product=self.product,
+            quantity=2,
+        )
+    
+    def test_create_cart_item(self):
+        """Test cart item creation."""
+        self.assertEqual(self.cart_item.cart, self.cart)
+        self.assertEqual(self.cart_item.quantity, 2)
+        # self.assertEqual(self.cart_item.product_price, self.product.price)
+        self.assertEqual(
+            self.cart_item.product_discounted_price,
+            self.product.discounted_price
+        )
+        self.assertEqual(
+            self.cart_item.total_price,
+            self.product.discounted_price * self.cart_item.quantity
+        )
+        self.assertIsNotNone(self.cart_item.created_at)
+        self.assertIsNotNone(self.cart_item.updated_at)
+        self.assertIsNone(self.cart_item.deleted_at)
+        self.assertIsNone(self.cart_item.created_by)
+        self.assertIsNone(self.cart_item.updated_by)
+        self.assertIsNone(self.cart_item.deleted_by)

@@ -3,6 +3,8 @@ from django.db import models
 
 from common.models import BaseModel
 
+from products.models import Product
+
 from users.choices import AddressChoices
 
 User = get_user_model()
@@ -58,3 +60,59 @@ class Address(BaseModel):
 
     def full_address(self):
         return f"{self.address}, {self.city}, {self.state}, {self.country}, {self.pin_code}"
+
+class Cart(BaseModel):
+    profile = models.OneToOneField(
+        Profile, on_delete=models.CASCADE, related_name='cart',
+        null=True, blank=True
+    )
+
+    ip_address = models.GenericIPAddressField(
+        blank=True, null=True
+    )
+
+    def __str__(self):
+        return  f"profile-{self.profile_id}-cart"
+    
+class CartItem(BaseModel):
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE,
+        related_name='cart_items'
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    quantity = models.PositiveIntegerField(default=0)
+    product_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        blank=True, null=True
+    )
+    product_discounted_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        blank=True, null=True
+    )
+    discount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
+    )
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        blank=True, null=True
+    )
+
+    def save(self, *args, **kwargs):
+        self.product_price = self.product.price
+        self.product_discounted_price = self.product.discounted_price
+        
+        self.total_price = self.product_discounted_price * self.quantity
+        super(CartItem, self).save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product_id', 'cart_id'], name='unique_cart_product'
+            )
+        ]
+
+    def __str__(self) -> str:
+        return 'cart_'+str(self.cart_id)+ '-product-'+str(self.product_id)

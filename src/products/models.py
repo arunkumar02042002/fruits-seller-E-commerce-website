@@ -29,7 +29,6 @@ class Tag(BaseModel):
 
 
 class Product(BaseModel):
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=10, choices=ProductCategoryChoice.choices)
@@ -65,7 +64,10 @@ class Product(BaseModel):
 
 
 class ProductTag(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE,
+        null=True, blank=True
+    )
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
     class Meta:
