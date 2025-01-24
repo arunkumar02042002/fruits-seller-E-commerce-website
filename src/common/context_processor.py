@@ -15,7 +15,6 @@ def top_testimonials(request):
         )[:5]
     return dict(top_rated_testimonials=top_rated_testimonials)
 
-
 def featured_products(request):
     """Return featured products."""
     featured_products = Product.objects.filter(is_featured=True).order_by("-created_at")[:3]
@@ -38,17 +37,8 @@ def cart_items_count(request):
     ip = request.META.get("REMOTE_ADDR")
 
     if user.is_authenticated:
-        cart = Cart.objects.filter(profile__user=user).first()
+        count = Cart.objects.filter(profile__user=user).count()
     else:
-        cart = Cart.objects.filter(ip_address=ip, profile__isnull=True).first()
-    
-    count = 0
-    if cart is not None:
-        count = cart.cart_items.count()
+        count = Cart.objects.filter(ip_address=ip, profile__isnull=True).count()
 
     return dict(cart_items_count=count)
-
-def featured_products(request):
-    """Return featured products."""
-    featured_products = Product.objects.filter(is_featured=True).order_by("-created_at")[:3]
-    return dict(featured_products=featured_products)
