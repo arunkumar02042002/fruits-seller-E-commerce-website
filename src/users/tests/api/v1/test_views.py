@@ -4,8 +4,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
-from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 from products.factories import ProductFactory
+from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 
 class CartItemListAPIViewTests(APITestCase):
     """Test the CartItemListAPIView view."""
@@ -26,10 +26,11 @@ class CartItemListAPIViewTests(APITestCase):
 
     def test_get_cart_items_guest_user(self):
         """Test get cart items for guest user."""
-        CartItemFactory(cart=self.cart)
-        response = self.client.get(self.url, REMOTE_ADDR='127.0.0.1')
+        cart = CartFactory(ip_address='220.0.01.2', profile=None)
+        CartItemFactory(cart=cart)
+        response = self.client.get(self.url, REMOTE_ADDR='220.0.01.2')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['payload']['cart_items']), 2)
+        self.assertEqual(len(response.data['payload']['cart_items']), 1)
 
     def test_get_cart_items_no_cart(self):
         """Test get cart items for user with no cart."""
@@ -78,5 +79,4 @@ class CartItemCreateAPIViewTests(APITestCase):
             'quantity': 1
         }
         response = self.client.post(self.url, data)
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

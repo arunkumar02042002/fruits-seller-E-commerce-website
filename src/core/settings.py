@@ -82,6 +82,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "common.context_processor.top_testimonials",
                 "common.context_processor.featured_products",
+                "common.context_processor.category_product_count",
+                "common.context_processor.cart_items_count",
             ],
         },
     },

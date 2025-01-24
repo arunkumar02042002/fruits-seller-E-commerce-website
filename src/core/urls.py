@@ -25,6 +25,7 @@ urlpatterns = [
     path("authentication/", include("authentication.urls")),
     path("contact/", include("contact.urls")),
     path("products/", include("products.urls")),
+    path("users/", include("users.urls")),
     # API Views
     path("api/v1/authentication/", include("authentication.api.v1.urls")),
     path("api/v1/products/", include("products.api.v1.urls")),

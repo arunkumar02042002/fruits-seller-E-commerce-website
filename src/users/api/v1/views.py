@@ -24,7 +24,9 @@ class CartItemListAPIView(RetrieveAPIView):
         ip_address = self.request.META.get('REMOTE_ADDR')
         if user.is_authenticated:
             return super().get_queryset().filter(profile__user=user).prefetch_related('cart_items').first()
-        return super().get_queryset().filter(ip_address=ip_address).prefetch_related('cart_items').first()
+        return super().get_queryset().filter(
+            ip_address=ip_address, profile__isnull=True
+        ).prefetch_related('cart_items').first()
     
     def get(self, request, *args, **kwargs):
         """Get cart items for authenticated user or guest user."""

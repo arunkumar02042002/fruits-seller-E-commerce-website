@@ -1,5 +1,6 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from products.factories import ProductFactory
 
@@ -125,3 +126,16 @@ class CartItemModelTest(TestCase):
         self.assertIsNone(self.cart_item.created_by)
         self.assertIsNone(self.cart_item.updated_by)
         self.assertIsNone(self.cart_item.deleted_by)
+
+class TestCartView(TestCase):
+    """Test Cart View."""
+    def setUp(self):
+        """Prepare data for tests."""
+        self.url = reverse('cart')
+        self.client = Client()
+        
+    def test_cart_view(self):
+        """Test cart view."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/cart.html')
