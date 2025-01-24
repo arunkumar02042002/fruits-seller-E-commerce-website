@@ -1,17 +1,28 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework.generics import RetrieveAPIView, CreateAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    RetrieveAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 
-from common.responses import reponse_200OK, reponse_201Created
+from common.responses import (
+    response_204NoContent,
+    reponse_200OK,
+    reponse_201Created
+)
 
 from products.models import Product
 
+from users.api.v1.permissions import IsCartItemOwner
+
 from users.api.v1.serializers import (
     AddToCartSerializer,
+    CartItemSerializer,
+    CartItemUpdateSerializer,
     CartSerializer,
-    CartItemSerializer
 )
-from users.models import Cart
+from users.models import Cart, CartItem
 
 class CartItemListAPIView(RetrieveAPIView):
     """Fetch cart items for authenticated user or guest user."""
@@ -62,3 +73,36 @@ class CartItemCreateAPIView(CreateAPIView):
             serializer.save(profile=user.profile, ip_address=ip_address)
         else:
             serializer.save(ip_address=self.request.META.get('REMOTE_ADDR'))
+
+
+class CartItemAPIView(RetrieveUpdateDestroyAPIView):
+    """Update cart items."""
+    serializer_class = CartItemUpdateSerializer
+    permission_classes = [IsCartItemOwner]
+    queryset = CartItem.objects.all()
+    lookup_field = 'uuid'
+    queryset = CartItem.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        return reponse_200OK(
+            "Cart item retreived successfully.",
+            payload = {
+                **response.data
+            }
+        )
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return reponse_200OK(
+            "Cart item updated successfully.",
+            payload = {
+                **response.data
+            }
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        return response_204NoContent(
+            "Cart item deleted successfully.",
+        )

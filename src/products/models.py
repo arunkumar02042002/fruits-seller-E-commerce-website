@@ -51,7 +51,11 @@ class Product(BaseModel):
 
     @property
     def discounted_price(self):
-        return round(self.price * (1 - self.discount_in_percent/100), 2)
+        # Ensure that both price and discount_in_percent are Decimal
+        price_decimal = Decimal(self.price)
+        discount_decimal = Decimal(self.discount_in_percent)
+        discounted_price = price_decimal * (1 - discount_decimal / Decimal(100))
+        return round(discounted_price, 2)
 
     def __str__(self) -> str:
         return self.name
