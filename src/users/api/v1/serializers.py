@@ -61,3 +61,22 @@ class AddToCartSerializer(serializers.Serializer):
                 quantity=self.validated_data.get('quantity'),
             )
         return cart
+
+class CartItemUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CartItem
+        read_only_fields = [
+            'cart', 'product',
+            'product_price',
+            'product_discounted_price',
+            'discount', 'total_price'
+        ]
+        exclude = ['deleted_at', 'created_by', 'updated_by', 'deleted_by']
+
+    def validate_quantity(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Quantity cannot be less than 1. Try deleting the item instead."
+            )
+        return value

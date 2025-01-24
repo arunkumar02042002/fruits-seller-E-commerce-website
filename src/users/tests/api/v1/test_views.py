@@ -80,3 +80,168 @@ class CartItemCreateAPIViewTests(APITestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class CartItemAPIViewTests(APITestCase):
+    """Test the CartItemUpdateAPIView view."""
+    def setUp(self):
+        self.client = APIClient()
+        self.profile = UserProfileFactory()
+        self.cart = CartFactory(
+            profile=self.profile,
+            ip_address='127.0.0.1'
+        )
+        self.product = ProductFactory(name='Test Product', price=10.0)
+        self.cart_item = CartItemFactory(
+            cart=self.cart,
+            product=self.product,
+            quantity=2
+        )
+    
+    def get_url(self, uuid):
+        return reverse(
+            'cart-item-retrieve-update-destroy', 
+            kwargs={'uuid': uuid}
+        )  
+
+    def test_retrieve_cart_item_authenticated_user(self):
+        """Test retrieve cart item for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.get(self.get_url(self.cart_item.uuid))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['payload']['product'], self.product.uuid)
+        self.assertEqual(response.data['payload']['quantity'], 2)
+        self.assertEqual(response.data['payload']['cart'], self.cart.uuid)
+
+    def test_retrieve_cart_item_as_guest_user(self):
+        """Test retrieve cart item as guest user."""
+        response = self.client.get(
+            self.get_url(self.cart_item.uuid),
+            REMOTE_ADDR='127.0.0.1'
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_retrieve_cart_item_with_other_user(self):
+        """Test retrieve cart item for other user permission."""
+        user = UserProfileFactory().user
+        self.client.force_login(user)
+        response = self.client.get(self.get_url(self.cart_item.uuid))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retreive_cart_item_for_guest_user(self):
+        """Test retrieve cart item for guest user."""
+        cart = CartFactory(ip_address='127.0.0.2', profile=None)
+        cart_item =CartItemFactory(
+            cart=cart,
+            product=self.product,
+            quantity=1
+        )
+        response = self.client.get(self.get_url(cart_item.uuid), REMOTE_ADDR='127.0.0.2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['payload']['product'], self.product.uuid)
+        self.assertEqual(response.data['payload']['quantity'], 1)
+        self.assertEqual(response.data['payload']['cart'], cart.uuid)
+
+    def test_update_cart_item_authenticated_user(self):
+        """Test update cart item for authenticated user."""
+        self.client.force_login(self.profile.user)
+        data = {
+            'quantity': 3
+        }
+        response = self.client.put(self.get_url(self.cart_item.uuid), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Cart item updated successfully.')
+        self.assertEqual(response.data['payload']['quantity'], 3)
+
+    def test_update_cart_item_authenticated_user_invalid_quantity(self):
+        """Test update cart item for authenticated user with invalid quantity."""
+        self.client.force_login(self.profile.user)
+        data = {
+            'quantity': 0
+        }
+        response = self.client.put(self.get_url(self.cart_item.uuid), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data['message'],
+            'quantity: Quantity cannot be less than 1. Try deleting the item instead.'
+        )
+        self.assertEqual(response.data['status'], 'error')
+
+    def test_update_cart_item_with_unauthenticated_user(self):
+        """Test update cart item for other user permission."""
+        data = {
+            'quantity': 2
+        }
+        
+        response = self.client.put(self.get_url(self.cart_item.uuid), data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_cart_item_with_other_user(self):
+        """Test update cart item for other user permission."""
+        user = UserProfileFactory().user
+        data = {
+            'quantity': 2
+        }
+        self.client.force_login(user)
+        response = self.client.put(
+            self.get_url(self.cart_item.uuid),
+            data, REMOTE_ADDR='127.0.0.2'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_cart_item_guest_user(self):
+        """Test update cart item for guest user."""
+        cart = CartFactory(ip_address='127.0.0.2', profile=None)
+        cart_item =CartItemFactory(
+            cart=cart,
+            product=self.product,
+            quantity=1
+        )
+        data = {
+            'quantity': 4
+        }
+        response = self.client.put(self.get_url(cart_item.uuid), data, REMOTE_ADDR='127.0.0.2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Cart item updated successfully.')
+        self.assertEqual(response.data['payload']['quantity'], 4)
+        self.assertEqual(response.data['payload']['cart'], cart.uuid)
+        self.assertEqual(response.data['payload']['product'], self.product.uuid)
+
+    def test_delete_cart_item_authenticated_user(self):
+        """Test delete cart item for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.delete(self.get_url(self.cart_item.uuid))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_cart_item_guest_user(self):
+        """Test delete cart item for guest user."""
+        cart = CartFactory(ip_address='127.0.0.2', profile=None)
+        cart_item =CartItemFactory(
+            cart=cart,
+            product=self.product,
+            quantity=1
+        )
+        response = self.client.delete(self.get_url(cart_item.uuid), REMOTE_ADDR='127.0.0.2')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    
+    def test_delete_cart_item_with_other_user(self):
+        """Test delete cart item for other user permission."""
+        user = UserProfileFactory().user
+        self.client.force_login(user)
+        response = self.client.delete(self.get_url(self.cart_item.uuid))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_delete_cart_item_with_unauthenticated_user(self):
+        """Test delete cart item for other user permission."""
+        response = self.client.delete(self.get_url(self.cart_item.uuid), REMOTE_ADDR='127.0.0.2')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_delete_cart_item_cart_invalid_ip_item(self):
+        cart = CartFactory(ip_address='127.0.0.2', profile=None)
+        cart_item =CartItemFactory(
+            cart=cart,
+            product=self.product,
+            quantity=1
+        )
+        response = self.client.delete(self.get_url(cart_item.uuid), REMOTE_ADDR='127.0.0.1')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
