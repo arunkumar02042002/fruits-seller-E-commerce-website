@@ -43,6 +43,13 @@ class AddToCartSerializer(serializers.Serializer):
             if not cart:
                cart = Cart.objects.create(ip_address=ip_address, profile=profile)
 
+            # if cart is created with ip_address, then update the profile
+            # and ip_address fields
+            if not cart.profile or not cart.ip_address: 
+                cart.profile = profile
+                cart.ip_address = ip_address
+                cart.save()
+
             cart_item = CartItem.objects.filter(cart=cart, product_id=product_uuid).first()
 
             if cart_item:

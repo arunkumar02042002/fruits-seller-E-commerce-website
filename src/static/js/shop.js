@@ -17,6 +17,7 @@ const PRODUCT_CONTAINER = document.getElementById('product-container');
 
 const PRODUCT_URL = `${window.location.origin}/api/v1/products/`;
 const TAG_URL = `${window.location.origin}/api/v1/products/tags/`;
+const ADD_TO_CART_URL = `${window.location.origin}/api/v1/users/cart/add/`;
 
 // Pagination Buttons
 const PAGINATION_DIV = document.getElementById('pagination-div');
@@ -31,6 +32,32 @@ const FILTER_DATA = {
     tags: [],
     page: 1,
 };
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+function alertMessage(message='', messageClass='alert-success') {
+    let alertDiv = document.createElement('div');
+    alertDiv.classList.add('alert', 'alert-dismissible', 'fade', 'show', messageClass);
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '0';
+    alertDiv.style.zIndex = '9999999';
+    alertDiv.style.width = '100%';
+    alertDiv.textContent = message;
+
+    let closeButton = document.createElement('button');
+    closeButton.classList.add('btn-close');
+    closeButton.setAttribute('data-bs-dismiss', 'alert');
+    closeButton.setAttribute('aria-label', "Close")
+
+    alertDiv.appendChild(closeButton);
+    document.body.appendChild(alertDiv);
+}
 
 
 // Category filter
@@ -424,4 +451,46 @@ CLEAR_FILTERS_BTN.addEventListener('click', (e) => {
     FILTER_DATA.page = 1;
     
     processProduct();
+});
+
+// Add to cart feature
+PRODUCT_CONTAINER.addEventListener('click', async (e) => {
+    if (e.target.tagName === 'BUTTON') {
+        let i = createElement('i');
+        i.classList.add('fas', 'fa-check', 'text-primary');
+        e.target.innerHTML = 'Added to Cart';
+        e.target.classList.add('disabled');
+        e.target.prepend(i);
+        let product_uuid = e.target.getAttribute('data-product_uuid');
+        let quantity = 1;
+        try {
+            let csrftoken = getCookie('csrftoken');
+            const response = await fetch(ADD_TO_CART_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    product_uuid: product_uuid,
+                    quantity: quantity
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            alertMessage(data.message);
+        } catch (error) {
+            if (error.message == "Product already exists in cart."){
+                e.target.innerHTML = 'Item already in Cart';
+                e.target.classList.add('disabled');
+                e.target.classList.add('text-danger');
+            }
+            alertMessage(error.message, 'alert-danger');
+        }
+    }
 });
