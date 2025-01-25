@@ -83,3 +83,30 @@ class ProductTag(BaseModel):
 
     def __str__(self) -> str:
         return "Tag-" + str(self.tag_uuid) + "-product-" + str(self.product_uuid)
+
+
+class Coupon(BaseModel):
+    code = models.CharField(max_length=20, unique=True)
+    discount = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    is_always_valid = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+    min_price_required = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal('0.00')
+    )
+
+    def __str__(self) -> str:
+        return self.code
+
+    def clean(self) -> None:
+        self.code = self.code.upper()
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)

@@ -1,5 +1,9 @@
+from decimal import Decimal
+
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
+from rest_framework.views import APIView
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
@@ -22,7 +26,10 @@ from users.api.v1.serializers import (
     CartItemUpdateSerializer,
     CartSerializer,
 )
+
+from users.db_utils import get_cart_from_request_obj, get_cart_total
 from users.models import Cart, CartItem
+
 
 class CartItemListAPIView(RetrieveAPIView):
     """Fetch cart items for authenticated user or guest user."""
@@ -102,7 +109,22 @@ class CartItemAPIView(RetrieveUpdateDestroyAPIView):
         )
     
     def destroy(self, request, *args, **kwargs):
-        response = super().destroy(request, *args, **kwargs)
+        super().destroy(request, *args, **kwargs)
         return response_204NoContent(
             "Cart item deleted successfully.",
+        )
+
+class CartTotalView(APIView):
+    """Get total price of cart items."""
+    def get(self, request):
+        cart = get_cart_from_request_obj(request)
+        sub_total = get_cart_total(cart)
+        
+        return reponse_200OK(
+            "Cart total_price retreived successfully.",
+            payload = {
+                "sub_total": sub_total,
+                "delivery_fee": Decimal(99.00),
+                "total": sub_total + Decimal(99.00)
+            }
         )
