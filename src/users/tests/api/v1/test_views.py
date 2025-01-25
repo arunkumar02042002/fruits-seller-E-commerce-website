@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
 from products.factories import ProductFactory
+
 from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 
 from users.factories import CartFactory, CartItemFactory, UserProfileFactory

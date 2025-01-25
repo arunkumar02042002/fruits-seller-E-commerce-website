@@ -109,7 +109,7 @@ class CartItemAPIView(RetrieveUpdateDestroyAPIView):
         )
     
     def destroy(self, request, *args, **kwargs):
-        response = super().destroy(request, *args, **kwargs)
+        super().destroy(request, *args, **kwargs)
         return response_204NoContent(
             "Cart item deleted successfully.",
         )

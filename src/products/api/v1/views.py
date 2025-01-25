@@ -80,21 +80,6 @@ class TagListView(ListAPIView):
         )
 
 
-class TagListView(ListAPIView):
-    serializer_class = TagSerializer
-    queryset = Tag.objects.all()
-    filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = TagFilter
-    ordering = ["title", "-created_at"]
-
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        return reponse_200OK(
-            message="Tags fetched successfully.",
-            payload={"tags": response.data}
-        )
-
-
 class CheckCouponView(GenericAPIView):
     serializer_class = CheckCouponSerializer
 
