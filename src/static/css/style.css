@@ -616,3 +616,7 @@
 .no-cursor{
     cursor: not-allowed !important;
 }
+
+.font-weight-bold{
+    font-weight: 600;
+}

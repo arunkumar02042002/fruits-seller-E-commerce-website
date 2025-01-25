@@ -1,10 +1,13 @@
 import uuid
+from decimal import Decimal
 
 from django.urls import reverse
+
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
 from products.factories import ProductFactory
+
 from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 
 class CartItemListAPIViewTests(APITestCase):
@@ -37,6 +40,7 @@ class CartItemListAPIViewTests(APITestCase):
         response = self.client.get(self.url, REMOTE_ADDR='192.168.0.1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['payload']['cart_items']), 0)
+
 
 class CartItemCreateAPIViewTests(APITestCase):
     """Test the CartItemCreateAPIView view."""
@@ -245,3 +249,47 @@ class CartItemAPIViewTests(APITestCase):
         )
         response = self.client.delete(self.get_url(cart_item.uuid), REMOTE_ADDR='127.0.0.1')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class CartTotalView(APITestCase):
+    """Test the CartTotalView view."""
+    def setUp(self):
+        self.client = APIClient()
+        self.profile = UserProfileFactory()
+        self.cart = CartFactory(
+            profile=self.profile,
+            ip_address='127.0.0.1',
+        )
+        self.p1 = ProductFactory(name='Test Product', price=20.0)
+        self.p2 = ProductFactory(name='Test Product', price=30.0)
+        self.p3 = ProductFactory(name='Test Product', price=70.0)
+
+        self.discountedPrice = (
+            self.p1.discounted_price*1 + self.p2.discounted_price*2 + self.p3.discounted_price*3
+        )
+        self.deliveryFee = Decimal(99.0)
+
+        CartItemFactory(cart=self.cart, product=self.p1, quantity=1)
+        CartItemFactory(cart=self.cart, product=self.p2, quantity=2)
+        CartItemFactory(cart=self.cart, product=self.p3, quantity=3)
+
+        self.url = reverse('cart-total')
+
+    def test_get_cart_total_authenticated_user(self):
+        """Test get cart total for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['payload']['sub_total'], self.discountedPrice)
+        self.assertEqual(response.data['payload']['delivery_fee'], self.deliveryFee)
+        self.assertEqual(response.data['payload']['total'], self.discountedPrice+self.deliveryFee)
+
+    def test_get_cart_total_guest_user(self):
+        """Test get cart total for guest user."""
+        self.cart.profile = None
+        self.cart.save()
+        response = self.client.get(self.url, REMOTE_ADDR='127.0.0.1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['payload']['sub_total'], self.discountedPrice)
+        self.assertEqual(response.data['payload']['delivery_fee'], self.deliveryFee)
+        self.assertEqual(response.data['payload']['total'], self.discountedPrice+self.deliveryFee)

@@ -1,6 +1,8 @@
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework import serializers
 
-from products.models import Product, Tag
+from products.models import Coupon, Product, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -26,3 +28,26 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_by", "updated_by",
             "deleted_at", "deleted_by"
         )
+
+class CheckCouponSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=20)
+
+    def validate_code(self, value):
+        """Validate coupon code."""
+        if not value.isalnum():
+            raise serializers.ValidationError("Invalid coupon code.")
+        
+        value = value.upper()
+        
+        coupon = Coupon.objects.filter(
+            Q(is_always_valid=True) |
+            Q(valid_from__lte=timezone.now(), valid_to__gte=timezone.now()),
+            code=value,
+            active=True,
+        )
+
+        coupon = coupon.first()
+
+        if coupon is None:
+            raise serializers.ValidationError("Could not find coupon.")
+        return coupon

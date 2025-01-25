@@ -1,12 +1,14 @@
 import random
 import uuid
 
-from factory import Faker, LazyFunction, post_generation, SubFactory, Sequence
+from django.utils import timezone
+
+from factory import Faker, LazyFunction, post_generation, Sequence
 from factory.django import DjangoModelFactory, ImageField
 from factory.fuzzy import FuzzyDecimal
 
 from products.choices import ProductCategoryChoice
-from products.models import Tag, Product
+from products.models import Coupon, Tag, Product
 
 
 class TagFactory(DjangoModelFactory):
@@ -40,3 +42,15 @@ class ProductFactory(DjangoModelFactory):
             # Add the given tags
             for tag in extracted:
                 self.tags.add(tag)
+
+
+class CouponFactory(DjangoModelFactory):
+    class Meta:
+        model = Coupon
+
+    code = Sequence(lambda n: f"code{n}")
+    discount = FuzzyDecimal(10, 100)
+    is_always_valid = False
+    valid_from = LazyFunction(lambda: timezone.now())
+    valid_to = LazyFunction(lambda: timezone.now() + timezone.timedelta(days=30))
+    active = True
