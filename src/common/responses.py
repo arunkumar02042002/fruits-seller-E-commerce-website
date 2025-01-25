@@ -47,6 +47,21 @@ def response_204NoContent(message=None, payload=None):
 
     return response
 
+def response_204NoContent(message=None, payload=None):
+    """Send a custom 204 Response"""
+    if message is None: message = "No content found."
+
+    response = Response(
+        {
+            "status" : "success",
+            "message" : message,
+            "payload" : payload
+        },
+        status=status.HTTP_204_NO_CONTENT
+    )
+
+    return response
+
 def response_400BadRequest(message=None, payload=None):
     """Send a custom 400 Response"""
     if message is None: message = "Bad request."

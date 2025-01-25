@@ -15,7 +15,6 @@ def top_testimonials(request):
         )[:5]
     return dict(top_rated_testimonials=top_rated_testimonials)
 
-
 def featured_products(request):
     """Return featured products."""
     featured_products = Product.objects.filter(is_featured=True).order_by("-created_at")[:3]

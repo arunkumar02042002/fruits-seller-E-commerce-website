@@ -114,6 +114,39 @@ class CartItemAPIView(RetrieveUpdateDestroyAPIView):
             "Cart item deleted successfully.",
         )
 
+
+class CartItemAPIView(RetrieveUpdateDestroyAPIView):
+    """Update cart items."""
+    serializer_class = CartItemUpdateSerializer
+    permission_classes = [IsCartItemOwner]
+    queryset = CartItem.objects.all()
+    lookup_field = 'uuid'
+    queryset = CartItem.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        return reponse_200OK(
+            "Cart item retreived successfully.",
+            payload = {
+                **response.data
+            }
+        )
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return reponse_200OK(
+            "Cart item updated successfully.",
+            payload = {
+                **response.data
+            }
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return response_204NoContent(
+            "Cart item deleted successfully.",
+        )
+
 class CartTotalView(APIView):
     """Get total price of cart items."""
     def get(self, request):

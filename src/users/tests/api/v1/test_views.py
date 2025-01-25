@@ -10,6 +10,8 @@ from products.factories import ProductFactory
 
 from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 
+from users.factories import CartFactory, CartItemFactory, UserProfileFactory
+
 class CartItemListAPIViewTests(APITestCase):
     """Test the CartItemListAPIView view."""
     def setUp(self):

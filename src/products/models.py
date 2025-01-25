@@ -45,6 +45,7 @@ class Product(BaseModel):
     image = models.ImageField(
         upload_to="products/product_images", null=True, blank=True
     )
+    rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.FIVE)
     is_featured = models.BooleanField(default=False)
 
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
