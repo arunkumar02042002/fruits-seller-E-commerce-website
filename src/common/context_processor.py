@@ -38,8 +38,12 @@ def cart_items_count(request):
     ip = request.META.get("REMOTE_ADDR")
 
     if user.is_authenticated:
-        count = Cart.objects.filter(profile__user=user).count()
+        cart = Cart.objects.filter(profile__user=user).first()
     else:
-        count = Cart.objects.filter(ip_address=ip, profile__isnull=True).count()
+        cart = Cart.objects.filter(ip_address=ip, profile__isnull=True).first()
+    
+    count = 0
+    if cart is not None:
+        count = cart.cart_items.count()
 
     return dict(cart_items_count=count)

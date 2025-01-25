@@ -1,18 +1,24 @@
-import math
+from decimal import Decimal
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 
-from common.responses import reponse_200OK
+from common.responses import reponse_200OK, response_400BadRequest
 
 from products.api.v1.filters import ProductFilter, TagFilter
-from products.api.v1.serializers import ProductSerializer, TagSerializer
+from products.api.v1.serializers import (
+    CheckCouponSerializer,
+    ProductSerializer,
+    TagSerializer,
+)
 
 from products.models import Product, Tag
 from products.utils import get_page_data
+
+from users.db_utils import get_cart_from_request_obj, get_cart_total
 
 class ProductListView(ListAPIView):
     queryset = Product.objects.all()
@@ -56,4 +62,38 @@ class TagListView(ListAPIView):
         return reponse_200OK(
             message="Tags fetched successfully.",
             payload={"tags": response.data}
+        )
+
+
+class CheckCouponView(GenericAPIView):
+    serializer_class = CheckCouponSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coupon = serializer.validated_data.get("code")
+
+        cart = get_cart_from_request_obj(request)
+        sub_total = get_cart_total(cart)
+
+        if coupon.min_price_required > sub_total:
+            return response_400BadRequest(
+                "Coupon code is not valid.",
+                payload={
+                    "error": {
+                        "code": [f"Minimum order price required {coupon.min_price_required}."]
+                    }
+                }
+            )
+
+        return reponse_200OK(
+            "Coupon code applied successfully.",
+            payload={
+                "code": coupon.code,
+                "discount": coupon.discount,
+                "sub_total": sub_total,
+                "delivery_fee": Decimal(99.00),
+                "total": sub_total + Decimal(99.00),
+                "discounted_total": sub_total + Decimal(99.00) - coupon.discount
+            }
         )

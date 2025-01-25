@@ -38,9 +38,11 @@ function getCookie(name) {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
     return null;
-  }
+}
 
 function alertMessage(message='', messageClass='alert-success') {
+    document.querySelectorAll('.alert').forEach(alert => alert.remove());
+
     let alertDiv = document.createElement('div');
     alertDiv.classList.add('alert', 'alert-dismissible', 'fade', 'show', messageClass);
     alertDiv.setAttribute('role', 'alert');
@@ -483,7 +485,6 @@ PRODUCT_CONTAINER.addEventListener('click', async (e) => {
             if (!response.ok) {
                 throw new Error(data.message);
             }
-            alertMessage(data.message);
         } catch (error) {
             if (error.message == "Product already exists in cart."){
                 e.target.innerHTML = 'Item already in Cart';
