@@ -83,7 +83,7 @@ class CartItem(BaseModel):
         Product, on_delete=models.CASCADE,
         null=True, blank=True
     )
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField(default=1)
     product_price = models.DecimalField(
         max_digits=10, decimal_places=2,
         blank=True, null=True

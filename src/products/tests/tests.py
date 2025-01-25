@@ -1,11 +1,14 @@
+from datetime import timedelta
+from decimal import Decimal
+
 from django.test import TestCase
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from decimal import Decimal
 
 from products.models import Tag, Product, ProductTag
 from products.choices import ProductCategoryChoice, RatingChoices
-from products.factories import ProductFactory, TagFactory
+from products.factories import CouponFactory, ProductFactory, TagFactory
 
 from users.factories import UserFactory
 
@@ -132,3 +135,37 @@ class ProductTagModelTests(TestCase):
         with self.assertRaises(ValidationError):
             duplicate_product_tag = ProductTag(product=self.product, tag=self.tag)
             duplicate_product_tag.full_clean()
+
+
+class TestCouponModel(TestCase):
+    """Test Coupon Model."""
+    def setUp(self):
+        """Prepare data for tests."""
+        self.coupon = CouponFactory(
+            code="testcode",
+            discount=10,
+            valid_from=timezone.now(),
+            valid_to=timezone.now() + timedelta(days=30),
+            is_always_valid=False,
+            active=True,
+            min_price_required=100
+        )
+    
+    def test_create_coupon(self):
+        """Test coupon creation."""
+        self.assertEqual(self.coupon.code, "TESTCODE")
+        self.assertEqual(self.coupon.discount, 10)
+        self.assertEqual(self.coupon.valid_from.date(), timezone.now().date())
+        self.assertEqual(
+            self.coupon.valid_to.date(),
+            (timezone.now() + timedelta(days=30)).date()
+        )
+        self.assertFalse(self.coupon.is_always_valid)
+        self.assertTrue(self.coupon.active)
+        self.assertEqual(self.coupon.min_price_required, 100)
+        self.assertIsNotNone(self.coupon.created_at)
+        self.assertIsNotNone(self.coupon.updated_at)
+        self.assertIsNone(self.coupon.deleted_at)
+        self.assertIsNone(self.coupon.created_by)
+        self.assertIsNone(self.coupon.updated_by)
+        self.assertIsNone(self.coupon.deleted_by)

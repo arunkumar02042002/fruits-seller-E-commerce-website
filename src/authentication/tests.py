@@ -121,6 +121,7 @@ class SignUpViewTests(TestCase):
         self.assertEqual(user.first_name, "test")
         self.assertEqual(user.last_name, "user")
         self.assertTrue(user.check_password("testpassword123"))
+        self.assertFalse(user.is_active)
 
         # Check that an email was sent
         mock_send_mail.assert_called_once()

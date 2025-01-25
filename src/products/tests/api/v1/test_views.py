@@ -1,13 +1,25 @@
+from datetime import timedelta
+from decimal import Decimal
 import time
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from products.choices import ProductCategoryChoice
-from products.factories import ProductFactory, TagFactory
+from products.factories import (
+    CouponFactory,
+    ProductFactory, TagFactory
+)
+
+from users.factories import (
+    CartFactory,
+    CartItemFactory,
+    UserProfileFactory
+)
 
 
 class ProductListViewTest(TestCase):
@@ -277,7 +289,6 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 0)
 
-
 class TagListView(TestCase):
     """Test Tag List View."""
 
@@ -339,3 +350,116 @@ class TagListView(TestCase):
         response = self.client.get(self.url, {'title':'sour'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["tags"]), 0)
+
+
+class CheckCouponViewTest(TestCase):
+    """Test Check Coupon View."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.profile = UserProfileFactory()
+        self.cart = CartFactory(profile=self.profile)
+        self.p1 = ProductFactory(price=50, discount_in_percent=10)
+        self.p2 = ProductFactory(price=100, discount_in_percent=20)
+        self.cart_item = CartItemFactory(cart=self.cart, product=self.p1, quantity=2)
+        self.cart_item = CartItemFactory(cart=self.cart, product=self.p2, quantity=1)
+        self.coupon1 = CouponFactory(
+            code="code1",
+            discount=10,
+            min_price_required=50,
+            is_always_valid=True,
+            valid_from=None,
+            valid_to=None
+        )
+        self.coupon2 = CouponFactory(
+            code="code2",
+            discount=10,
+            min_price_required=100,
+        )
+        self.inactiveCoupon = CouponFactory(
+            code="code3",
+            discount=10,
+            min_price_required=100,
+            active=False
+        )
+        self.expiredCoupon = CouponFactory(
+            code="code4",
+            discount=10,
+            min_price_required=100,
+            valid_from=timezone.now() - timedelta(days=30),
+            valid_to=timezone.now() - timedelta(days=1)
+        )
+        self.minPriceHighCoupon = CouponFactory(
+            code="code5",
+            discount=10,
+            min_price_required=Decimal('10000.00'),
+            is_always_valid=True,
+        )
+        self.sub_total = (
+            self.p1.discounted_price * 2 + self.p2.discounted_price
+        )
+        self.delivery_fee = Decimal("99.00")
+        self.url = reverse("check-coupon")
+    
+
+    def test_check_inactive_coupon(self):
+        """Test inactive coupon check."""
+        response = self.client.post(self.url, {"code": "code3"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], "code: Could not find coupon.")
+
+    def test_check_invalid_coupon_code(self):
+        """Test invalid coupon check."""
+        response = self.client.post(self.url, {"code": "code-1"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], "code: Invalid coupon code.")
+        self.assertEqual(response.data["payload"]["errors"]["code"][0], "Invalid coupon code.")
+
+    def test_check_expired_coupon(self):
+        """Test expired coupon check."""
+        response = self.client.post(self.url, {"code": "code4"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], "code: Could not find coupon.")
+        self.assertEqual(response.data["payload"]["errors"]["code"][0], "Could not find coupon.")
+
+    def test_min_price_required_is_greater(self):
+        """Test min price required is greater."""
+        response = self.client.post(self.url, {"code": "code5"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], "Coupon code is not valid.")
+        self.assertEqual(
+            response.data["payload"]["error"]["code"][0],
+            f"Minimum order price required {self.minPriceHighCoupon.min_price_required}."
+        )
+
+    def test_check_always_valid_coupon(self):
+        """Test always valid coupon check."""
+        self.client.force_authenticate(user=self.profile.user)
+        response = self.client.post(self.url, {"code": "code1"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["status"], "success")
+        self.assertEqual(response.data["message"], "Coupon code applied successfully.")
+        self.assertEqual(response.data["payload"]["discount"], 10)
+        self.assertEqual(response.data["payload"]["code"], self.coupon1.code)
+        self.assertEqual(response.data["payload"]["sub_total"], self.sub_total)
+        self.assertEqual(response.data["payload"]["delivery_fee"], self.delivery_fee)
+        self.assertEqual(response.data["payload"]["total"], self.sub_total + self.delivery_fee)
+        self.assertEqual(response.data["payload"]["discounted_total"], self.sub_total + self.delivery_fee - self.coupon1.discount)
+
+    def test_check_a_valid_coupon(self):
+        """Test a valid coupon check."""
+        self.client.force_authenticate(user=self.profile.user)
+        response = self.client.post(self.url, {"code": "code2"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["status"], "success")
+        self.assertEqual(response.data["message"], "Coupon code applied successfully.")
+        self.assertEqual(response.data["payload"]["discount"], 10)
+        self.assertEqual(response.data["payload"]["code"], self.coupon2.code)
+        self.assertEqual(response.data["payload"]["sub_total"], self.sub_total)
+        self.assertEqual(response.data["payload"]["delivery_fee"], self.delivery_fee)
+        self.assertEqual(response.data["payload"]["total"], self.sub_total + self.delivery_fee)
+        self.assertEqual(response.data["payload"]["discounted_total"], self.sub_total + self.delivery_fee - self.coupon2.discount)

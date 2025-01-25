@@ -43,6 +43,13 @@ class AddToCartSerializer(serializers.Serializer):
             if not cart:
                cart = Cart.objects.create(ip_address=ip_address, profile=profile)
 
+            # if cart is created with ip_address, then update the profile
+            # and ip_address fields
+            if not cart.profile or not cart.ip_address: 
+                cart.profile = profile
+                cart.ip_address = ip_address
+                cart.save()
+
             cart_item = CartItem.objects.filter(cart=cart, product_id=product_uuid).first()
 
             if cart_item:
@@ -54,3 +61,22 @@ class AddToCartSerializer(serializers.Serializer):
                 quantity=self.validated_data.get('quantity'),
             )
         return cart
+
+class CartItemUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CartItem
+        read_only_fields = [
+            'cart', 'product',
+            'product_price',
+            'product_discounted_price',
+            'discount', 'total_price'
+        ]
+        exclude = ['deleted_at', 'created_by', 'updated_by', 'deleted_by']
+
+    def validate_quantity(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Quantity cannot be less than 1. Try deleting the item instead."
+            )
+        return value

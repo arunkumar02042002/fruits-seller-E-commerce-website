@@ -45,14 +45,17 @@ class Product(BaseModel):
     image = models.ImageField(
         upload_to="products/product_images", null=True, blank=True
     )
-    rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.FIVE)
     is_featured = models.BooleanField(default=False)
 
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
 
     @property
     def discounted_price(self):
-        return round(self.price * (1 - self.discount_in_percent/100), 2)
+        # Ensure that both price and discount_in_percent are Decimal
+        price_decimal = Decimal(self.price)
+        discount_decimal = Decimal(self.discount_in_percent)
+        discounted_price = price_decimal * (1 - discount_decimal / Decimal(100))
+        return round(discounted_price, 2)
 
     def __str__(self) -> str:
         return self.name
@@ -79,3 +82,30 @@ class ProductTag(BaseModel):
 
     def __str__(self) -> str:
         return "Tag-" + str(self.tag_uuid) + "-product-" + str(self.product_uuid)
+
+
+class Coupon(BaseModel):
+    code = models.CharField(max_length=20, unique=True)
+    discount = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    is_always_valid = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+    min_price_required = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal('0.00')
+    )
+
+    def __str__(self) -> str:
+        return self.code
+
+    def clean(self) -> None:
+        self.code = self.code.upper()
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
