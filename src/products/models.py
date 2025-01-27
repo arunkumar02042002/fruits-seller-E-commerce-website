@@ -7,7 +7,11 @@ from django.contrib.auth import get_user_model
 
 from common.models import BaseModel
 
-from products.choices import ProductCategoryChoice, RatingChoices
+from products.choices import (
+    ProductCategoryChoice,
+    QuantityTypeChoices,
+    RatingChoices
+)
 
 
 User = get_user_model()
@@ -41,6 +45,13 @@ class Product(BaseModel):
     )
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))]
+    )
+    stock = models.PositiveIntegerField(null=True, blank=True)
+    quantity = models.CharField(max_length=10, null=True, blank=True)
+    quantity_type = models.CharField(
+        max_length=10,
+        choices=QuantityTypeChoices.choices,
+        default=QuantityTypeChoices.NOT_SET,
     )
     image = models.ImageField(
         upload_to="products/product_images", null=True, blank=True

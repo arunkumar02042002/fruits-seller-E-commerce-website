@@ -15,3 +15,12 @@ class RatingChoices(models.IntegerChoices):
     FOUR = 4
     FIVE = 5
 
+class QuantityTypeChoices(models.TextChoices):
+    NOT_SET = "NOT_SET"
+    KG = "KG"
+    GRAM = "GRAM"
+    LITRE = "LITRE"
+    ML = "ML"
+    DOZEN = "DOZEN"
+    BOTTLE = "BOTTLE"
+    CAN = "CAN"
