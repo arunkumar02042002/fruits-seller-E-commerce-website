@@ -282,6 +282,7 @@ function addProductItem(item) {
     productImage.src = item.image;
     productImage.alt = item.name;
     productImage.classList.add('img-fluid', 'w-100', 'rounded-top');
+    productImage.style.height = '250px';
     productImageDiv.appendChild(productImage);
     productCard.appendChild(productImageDiv);
 
@@ -307,36 +308,45 @@ function addProductItem(item) {
     productCard.appendChild(productRatingBadge);
 
     let productContent = createElement('div');
-    productContent.classList.add('p-4', 'border', 'border-secondary', 'border-top-0', 'rounded-bottom');
+    productContent.classList.add(
+        'p-4', 'border', 'border-secondary', 'border-top-0', 'rounded-bottom',
+        'd-flex', 'flex-column', 'align-items-center'
+    );
 
-    let heading = createElement('h4');
-    heading.innerText = item.name;
+    let heading = createElement('h5');
+    let link = createElement('a')
+    link.setAttribute('href', `${window.location.origin}/products/shop/${item.uuid}/`);
+    link.innerText = item.name;
+    heading.appendChild(link);
     productContent.appendChild(heading);
 
+    let discount = createElement('p');
+    discount.classList.add('text-success', 'fw-bold', 'mb-2');
+    discount.innerText = `(${item.discount} % off)`;
+    productContent.appendChild(discount);
+
     let priceDiv = createElement('div');
-    priceDiv.classList.add('d-flex', 'flex-lg-wrap', 'justify-content-between');
-    let price = createElement('p');
-    price.classList.add('text-dark', 'fs-5', 'fw-bold', 'mb-0');
+    priceDiv.classList.add('d-flex', 'flex-lg-wrap', 'justify-content-center');
+
+    let price = createElement('span');
+    price.classList.add('text-dark', 'fs-5', 'fw-bold',);
     price.innerText = '₹'.concat(item.discounted_price);
     priceDiv.appendChild(price);
 
-    let originalPrice = createElement('p');
-    originalPrice.classList.add('text-danger', 'text-decoration-line-through');
-    originalPrice.innerText = '₹'.concat(item.price);
+    let originalPrice = createElement('small');
+    originalPrice.classList.add('text-danger', 'text-decoration-line-through', 'ms-1');
+    originalPrice.innerText = item.price;
     priceDiv.appendChild(originalPrice);
-
-    let discount = createElement('p');
-    discount.classList.add('text-success', 'fw-bold', 'mb-0');
-    discount.innerText = item.discount.concat('% off');
-    priceDiv.appendChild(discount);
     productContent.appendChild(priceDiv);
 
-    let description = createElement('p');
-    description.innerText = item.description;
-    productContent.appendChild(description);
+    let weight = createElement('small');
+    weight.classList.add('ms-1')
+    weight.innerText = 'per'.concat(' ', item.quantity, ' ', item.unit);
+    productContent.appendChild(weight);
+
 
     let addToCartButton = createElement('button');
-    addToCartButton.classList.add('btn', 'border', 'border-secondary', 'rounded-pill', 'px-3', 'text-primary');
+    addToCartButton.classList.add('btn', 'border', 'border-secondary', 'rounded-pill', 'px-3', 'text-primary', 'w-100', 'mt-3');
     addToCartButton.setAttribute('data-product_uuid', item.uuid);
     addToCartButton.innerHTML = '<i class="fas fa-shopping-bag me-2 text-primary"></i> Add to Cart';
     productContent.appendChild(addToCartButton);
@@ -347,7 +357,7 @@ function addProductItem(item) {
 }
 
 // Process the fetched products
-let processProduct = async (e) => {
+let processProduct = async () => {
     FETCH_PRODUCTS_BTN.setAttribute('disabled', 'disabled');
     let data = await fetchProducts();
     

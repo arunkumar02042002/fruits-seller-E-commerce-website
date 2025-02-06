@@ -17,10 +17,10 @@ class RatingChoices(models.IntegerChoices):
 
 class QuantityTypeChoices(models.TextChoices):
     NOT_SET = "NOT_SET"
-    KG = "KG"
-    GRAM = "GRAM"
-    LITRE = "LITRE"
-    ML = "ML"
+    KG = "Kg"
+    GRAM = "g"
+    LITRE = "L"
+    ML = "mL"
     DOZEN = "DOZEN"
     BOTTLE = "BOTTLE"
     CAN = "CAN"

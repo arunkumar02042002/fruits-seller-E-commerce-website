@@ -30,6 +30,8 @@ urlpatterns = [
     path("api/v1/authentication/", include("authentication.api.v1.urls")),
     path("api/v1/products/", include("products.api.v1.urls")),
     path("api/v1/users/", include("users.api.v1.urls")),
+    # Third-party
+    path("ckeditor5/", include('django_ckeditor_5.urls'))
 ]
 
 if settings.DEBUG is True:

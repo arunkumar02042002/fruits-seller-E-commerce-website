@@ -8,8 +8,7 @@ from factory.django import DjangoModelFactory, ImageField
 from factory.fuzzy import FuzzyDecimal
 
 from products.choices import ProductCategoryChoice
-from products.models import Coupon, Tag, Product
-
+from products.models import Coupon, Product, ProductReview, Tag 
 
 class TagFactory(DjangoModelFactory):
     class Meta:
@@ -54,3 +53,10 @@ class CouponFactory(DjangoModelFactory):
     valid_from = LazyFunction(lambda: timezone.now())
     valid_to = LazyFunction(lambda: timezone.now() + timezone.timedelta(days=30))
     active = True
+
+class ProductReviewFactory(DjangoModelFactory):
+    class Meta:
+        model = ProductReview
+
+    rating = FuzzyDecimal(1, 5)
+    review = Faker('paragraph')
