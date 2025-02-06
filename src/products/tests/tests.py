@@ -8,9 +8,9 @@ from django.contrib.auth import get_user_model
 
 from products.models import Tag, Product, ProductTag
 from products.choices import ProductCategoryChoice, RatingChoices
-from products.factories import CouponFactory, ProductFactory, TagFactory
+from products.factories import CouponFactory, ProductFactory, ProductReviewFactory, TagFactory
 
-from users.factories import UserFactory
+from users.factories import UserFactory, UserProfileFactory
 
 User = get_user_model()
 
@@ -169,3 +169,29 @@ class TestCouponModel(TestCase):
         self.assertIsNone(self.coupon.created_by)
         self.assertIsNone(self.coupon.updated_by)
         self.assertIsNone(self.coupon.deleted_by)
+
+class TestProductReviewModel(TestCase):
+    """Test ProductReview Model."""
+    def setUp(self):
+        """Prepare data for tests."""
+        self.profile = UserProfileFactory()
+        self.product = ProductFactory()
+        self.review = ProductReviewFactory(
+            profile=self.profile,
+            product=self.product,
+            rating=RatingChoices.FOUR,
+            review="Good Product"
+        )
+    
+    def test_create_product_review(self):
+        """Test product review creation."""
+        self.assertEqual(self.review.profile, self.profile)
+        self.assertEqual(self.review.product, self.product)
+        self.assertEqual(self.review.rating, RatingChoices.FOUR)
+        self.assertEqual(self.review.review, "Good Product")
+        self.assertIsNotNone(self.review.created_at)
+        self.assertIsNotNone(self.review.updated_at)
+        self.assertIsNone(self.review.deleted_at)
+        self.assertIsNone(self.review.created_by)
+        self.assertIsNone(self.review.updated_by)
+        self.assertIsNone(self.review.deleted_by)
