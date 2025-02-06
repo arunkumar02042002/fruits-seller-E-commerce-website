@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
-from products.models import Coupon, Product, Tag
+from products.models import Coupon, Product, ProductReview, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -51,3 +51,13 @@ class CheckCouponSerializer(serializers.Serializer):
         if coupon is None:
             raise serializers.ValidationError("Could not find coupon.")
         return coupon
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductReview
+        exclude = (
+            "created_by", "updated_by",
+            "deleted_at", "deleted_by"
+        )
+        read_only_fields = ("profile", "product")

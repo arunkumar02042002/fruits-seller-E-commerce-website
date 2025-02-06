@@ -151,5 +151,6 @@ class ProductReview(BaseModel):
     
     def save(self, *args, **kwargs):
         if self.email and self.profile is None:
-            self.profile = User.objects.get(email=self.email).profile
+            user = User.objects.filter(email=self.email).first()
+            self.profile = user.profile if user else None
         return super().save(*args, **kwargs)

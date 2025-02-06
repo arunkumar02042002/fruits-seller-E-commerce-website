@@ -195,3 +195,12 @@ class TestProductReviewModel(TestCase):
         self.assertIsNone(self.review.created_by)
         self.assertIsNone(self.review.updated_by)
         self.assertIsNone(self.review.deleted_by)
+
+    def test_profile_set_on_save(self):
+        """Test profile is correctly set."""
+        review = ProductReviewFactory(email="test@email.com")
+        self.assertIsNone(review.profile)
+
+        user = UserProfileFactory().user
+        review = ProductReviewFactory(email=user.email)
+        self.assertEqual(review.profile, user.profile)
