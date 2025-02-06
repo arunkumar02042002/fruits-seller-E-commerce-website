@@ -289,6 +289,7 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["payload"]["results"]), 0)
 
+
 class TagListView(TestCase):
     """Test Tag List View."""
 
@@ -463,3 +464,52 @@ class CheckCouponViewTest(TestCase):
         self.assertEqual(response.data["payload"]["delivery_fee"], self.delivery_fee)
         self.assertEqual(response.data["payload"]["total"], self.sub_total + self.delivery_fee)
         self.assertEqual(response.data["payload"]["discounted_total"], self.sub_total + self.delivery_fee - self.coupon2.discount)
+
+
+class AddReviewAPIViewTest(TestCase):
+    """Test Add Review API View."""
+    def setUp(self):
+        """Set up data."""
+        self.client = APIClient()
+
+    def test_add_review_unauthenticated(self):
+        """Test add review unauthenticated."""
+        p = ProductFactory()
+        url = reverse("add-review", kwargs={"uuid": p.uuid})
+        response = self.client.post(
+            url,
+            {"rating": 4, "review": "Good Product"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.data["status"], "error")
+    
+    def test_add_review_authenticated(self):
+        """Test add review authenticated."""
+        profile = UserProfileFactory()
+        p = ProductFactory()
+        url = reverse("add-review", kwargs={"uuid": p.uuid})
+        self.client.force_authenticate(user=profile.user)
+        response = self.client.post(url, {"rating": 4, "review": "Good Product"})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["status"], "success")
+        self.assertEqual(response.data["message"], "Product review added successfully.")
+        self.assertEqual(response.data["payload"]["rating"], 4)
+        self.assertEqual(response.data["payload"]["review"], "Good Product")
+        self.assertEqual(response.data["payload"]["profile"], profile.uuid)
+        self.assertEqual(response.data["payload"]["product"], p.uuid)
+
+    def test_wrong_review_data(self):
+        """Test wrong review data."""
+        profile = UserProfileFactory()
+        p = ProductFactory()
+        url = reverse("add-review", kwargs={"uuid": p.uuid})
+        self.client.force_authenticate(user=profile.user)
+        response = self.client.post(url, {"rating": 6, "review": "Good Product"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], 'rating: "6" is not a valid choice.')
+
+        response = self.client.post(url, {"rating": 4, "review": ""})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["status"], "error")
+        self.assertEqual(response.data["message"], 'review: This field may not be blank.')

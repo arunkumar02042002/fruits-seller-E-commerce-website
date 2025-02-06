@@ -1,17 +1,21 @@
 from decimal import Decimal
 
+from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
-from common.responses import reponse_200OK, response_400BadRequest
+from common.responses import reponse_200OK, reponse_201Created, response_400BadRequest
 
 from products.api.v1.filters import ProductFilter, TagFilter
 from products.api.v1.serializers import (
     CheckCouponSerializer,
     ProductSerializer,
+    ProductReviewSerializer,
     TagSerializer,
 )
 
@@ -111,4 +115,24 @@ class CheckCouponView(GenericAPIView):
                 "total": sub_total + Decimal(99.00),
                 "discounted_total": sub_total + Decimal(99.00) - coupon.discount
             }
+        )
+    
+
+class AddProductReviewAPIView(GenericAPIView):
+    serializer_class = ProductReviewSerializer
+    permission_classes = [IsAuthenticated]
+    products = Product.objects.all()
+
+    def post(self, request, uuid, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product = get_object_or_404(self.products, uuid=uuid)
+        serializer.validated_data["product"] = product
+        serializer.validated_data["profile"] = request.user.profile
+        serializer.save()
+
+        return reponse_201Created(
+            "Product review added successfully.",
+            payload=serializer.data
         )
