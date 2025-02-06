@@ -297,7 +297,7 @@ CART_TABLE.addEventListener('click', async (e) => {
 
     else if (targetElement.classList.contains('delete-button') ){
         cartitem_id = targetElement.getAttribute('data-cartitem_id');
-        deleteCartItemModal(cartitem_id);       
+        deleteCartItemModal(cartitem_id);
     }
 
     if (cartitem_id && quantity) {
@@ -328,6 +328,7 @@ async function deleteCartItem(cartitem_id){
         if (!response.ok) {
             throw new Error(data.message);
         }
+        processCartTotal();
 
     } catch (error) {
         alertMessage(error.message);
@@ -436,7 +437,9 @@ async function fetchCartTotal() {
 // Process Cart Total
 async function processCartTotal(){
     let data = await fetchCartTotal();
-    updateCartTotal(data.payload);
+    if(data){
+        updateCartTotal(data.payload);
+    }
 }
 
 // Update Cart Total
@@ -444,6 +447,13 @@ function updateCartTotal(data){
     let subTotal = document.getElementById('subtotal-price');
     let shippingPrice = document.getElementById('shipping-price');
     let totalPrice = document.getElementById('total-price');
+
+    if (!data.sub_total){
+        subTotal.textContent = '';
+        shippingPrice.textContent = '';
+        totalPrice.textContent = '';
+        return;
+    }
 
     subTotal.textContent = data.sub_total;
     shippingPrice.textContent = data.delivery_fee;
