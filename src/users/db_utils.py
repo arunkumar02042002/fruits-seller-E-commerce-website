@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.db.models import Sum
+
 from users.models import Cart
 
 def get_cart_from_request_obj(request):
@@ -17,4 +20,5 @@ def get_cart_total(cart):
         sub_total = cart.cart_items.aggregate(
             sub_total=Sum('total_price')
         )['sub_total']
-    return sub_total
+    
+    return Decimal(sub_total) if sub_total else Decimal('0.00')

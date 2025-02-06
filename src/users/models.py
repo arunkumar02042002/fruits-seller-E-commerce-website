@@ -15,10 +15,12 @@ class Profile(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     profile_picture = models.ImageField(
-        upload_to="users/profile_pictures", blank=True, null=True
+        upload_to="users/profile_pictures", blank=True, null=True,
+        default='users/profile_pictures/default_profile.png'
     )
     cover_photo = models.ImageField(
-        upload_to="users/cover_photos", blank=True, null=True
+        upload_to="users/cover_photos", blank=True, null=True,
+        default='users/cover_photos/default_cover.jpg'
     )
     mobile = models.CharField(
         max_length=10, blank=True,
