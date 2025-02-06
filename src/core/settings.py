@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "crispy_forms",
+    "django_ckeditor_5",
     # local
     "authentication",
     "common",
@@ -165,6 +166,18 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = "staticfiles/"
+
+# CKEditor
+CKEDITOR_5_CONFIGS = {
+  'default': {
+      'toolbar': [
+            'heading', '|', 'bold', 'italic', 'link',
+            'bulletedList', 'numberedList', 'blockQuote', 'imageUpload',
+            'undo', 'redo'
+        ],
+      'language': 'en',
+  },
+}
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = "media/"
