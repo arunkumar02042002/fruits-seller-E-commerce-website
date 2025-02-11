@@ -22,7 +22,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Profile
-        fields = '__all__'
         exclude = [
             'deleted_at', 'created_by',
             'updated_by', 'deleted_by'

@@ -4,6 +4,8 @@ from rest_framework import serializers
 
 from products.models import Coupon, Product, ProductReview, Tag
 
+from users.serializers import ProfileSerializer
+
 
 class TagSerializer(serializers.ModelSerializer):
 
@@ -54,10 +56,10 @@ class CheckCouponSerializer(serializers.Serializer):
 
 class ProductReviewSerializer(serializers.ModelSerializer):
 
+    profile = ProfileSerializer(read_only=True)
+
     class Meta:
         model = ProductReview
-        exclude = (
-            "created_by", "updated_by",
-            "deleted_at", "deleted_by"
+        fields = (
+            "review", "rating", "profile", "created_at"
         )
-        read_only_fields = ("profile", "product")
