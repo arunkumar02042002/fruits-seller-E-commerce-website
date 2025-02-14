@@ -10,6 +10,8 @@ from products.models import Product
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
+    net_weight = serializers.CharField()
+
     class Meta:
         model = CartItem
         exclude = [
@@ -63,6 +65,7 @@ class AddToCartSerializer(serializers.Serializer):
         return cart
 
 class CartItemUpdateSerializer(serializers.ModelSerializer):
+    net_weight = serializers.CharField(read_only=True)
 
     class Meta:
         model = CartItem
@@ -70,7 +73,8 @@ class CartItemUpdateSerializer(serializers.ModelSerializer):
             'cart', 'product',
             'product_price',
             'product_discounted_price',
-            'discount', 'total_price'
+            'discount', 'total_price',
+            'net_weight'
         ]
         exclude = ['deleted_at', 'created_by', 'updated_by', 'deleted_by']
 

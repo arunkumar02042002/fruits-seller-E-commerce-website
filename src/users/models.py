@@ -3,6 +3,7 @@ from django.db import models
 
 from common.models import BaseModel
 
+from products.choices import QuantityTypeChoices
 from products.models import Product
 
 from users.choices import AddressChoices
@@ -101,6 +102,23 @@ class CartItem(BaseModel):
         max_digits=10, decimal_places=2,
         blank=True, null=True
     )
+
+    @property
+    def net_weight(self):
+        unit = self.product.unit
+        product_quantity = self.product.quantity
+        total_quantity = product_quantity * self.quantity
+
+        if unit == QuantityTypeChoices.GRAM and total_quantity >= 1000:
+            total_quantity /= 1000
+            unit = QuantityTypeChoices.KG
+        
+        if unit == QuantityTypeChoices.ML and total_quantity >= 1000:
+            total_quantity /= 1000
+            unit = QuantityTypeChoices.LITRE
+
+        return f"{total_quantity} {unit}"
+
 
     def save(self, *args, **kwargs):
         self.product_price = self.product.price

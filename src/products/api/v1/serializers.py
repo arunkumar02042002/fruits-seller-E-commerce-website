@@ -61,5 +61,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = (
-            "review", "rating", "profile", "created_at"
+            "review", "rating",
+            "profile", "created_at",
+            "product",
         )

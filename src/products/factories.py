@@ -7,7 +7,7 @@ from factory import Faker, LazyFunction, post_generation, Sequence
 from factory.django import DjangoModelFactory, ImageField
 from factory.fuzzy import FuzzyDecimal
 
-from products.choices import ProductCategoryChoice
+from products.choices import ProductCategoryChoice, QuantityTypeChoices
 from products.models import Coupon, Product, ProductReview, Tag 
 
 class TagFactory(DjangoModelFactory):
@@ -31,6 +31,8 @@ class ProductFactory(DjangoModelFactory):
     image = ImageField(color="blue")
     price = FuzzyDecimal(50, 500)
     discount_in_percent = FuzzyDecimal(10, 100)
+    quantity = 1
+    unit = QuantityTypeChoices.KG
 
     @post_generation
     def tags(self, create, extracted, **kwargs):
