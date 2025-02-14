@@ -107,6 +107,13 @@ function addCartItemToTable(item) {
     priceCell.appendChild(price);
     row.appendChild(priceCell);
 
+    let weightCell = document.createElement('td');
+    let weight = document.createElement('p');
+    weight.classList.add('mb-0', 'mt-4');
+    weight.textContent = `${item.product.quantity} ${item.product.unit}`;
+    weightCell.appendChild(weight);
+    row.appendChild(weightCell);
+
     let quantityCell = document.createElement('td');
     let quantityDiv = document.createElement('div');
     quantityDiv.classList.add('input-group', 'quantity', 'mt-4');
@@ -157,6 +164,14 @@ function addCartItemToTable(item) {
 
     quantityCell.appendChild(quantityDiv);
     row.appendChild(quantityCell);
+
+    let netWeightCell = document.createElement('td');
+    let netWeight = document.createElement('p');
+    netWeight.classList.add('mb-0', 'mt-4');
+    netWeight.textContent = item.net_weight
+    netWeight.setAttribute('id', `net-weight-${item.uuid}`);
+    netWeightCell.appendChild(netWeight);
+    row.appendChild(netWeightCell);
 
     let totalCell = document.createElement('td');
     let total = document.createElement('p');
@@ -247,7 +262,12 @@ const debouncedUpdateCartItem = debounce(updateCartItem, 300);
 
 function updateTableRow(item){
     let total = document.getElementById(`total-${item.uuid}`);
-    total.textContent = `${item.product_discounted_price} * ${item.quantity} = ${item.total_price}`;
+    total.innerHTML = `${item.product_discounted_price} * ${item.quantity} = ${item.total_price}`;
+
+    let netWeight = document.getElementById(`net-weight-${item.uuid}`);
+    netWeight.innerHTML = item.net_weight;
+
+    debugger;
 }
 
 CART_TABLE.addEventListener('click', async (e) => {
@@ -301,6 +321,15 @@ CART_TABLE.addEventListener('click', async (e) => {
     }
 
     if (cartitem_id && quantity) {
+
+        let total = document.getElementById(`total-${cartitem_id}`);
+        total.innerHTML = ''
+        total.appendChild(createLoader());
+    
+        let netWeight = document.getElementById(`net-weight-${cartitem_id}`);
+        netWeight.innerHTML = ''
+        netWeight.appendChild(createLoader());
+
         debouncedUpdateCartItem(cartitem_id, quantity);
     }
 });
@@ -532,3 +561,18 @@ COUPON_FORM.addEventListener('submit', async (e) => {
         COUPON_DIV.appendChild(p);
     }
 });
+
+
+function createLoader(){
+    // <span class="input-group-text p-3 pointer"><span id="loader" class="loader d-none"></span>
+    let loader = document.createElement('span');
+    loader.classList.add('input-group-text', 'p-3', 'pointer');
+    loader.style.width = '50px';
+
+    let span = document.createElement('span');
+    span.classList.add('loader');
+
+    loader.appendChild(span);
+
+    return loader;
+}
