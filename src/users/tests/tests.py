@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from products.choices import QuantityTypeChoices
 from products.factories import ProductFactory
 
 from users.factories import (
@@ -93,14 +94,18 @@ class CartModelTest(TestCase):
         self.assertIsNone(self.cart.created_by)
         self.assertIsNone(self.cart.updated_by)
         self.assertIsNone(self.cart.deleted_by)
-    
+
+
 class CartItemModelTest(TestCase):
     """Test CartItem Model."""
 
     def setUp(self):
         """Prepare data for tests."""
         self.cart = CartFactory()
-        self.product = ProductFactory()
+        self.product = ProductFactory(
+            quantity=2,
+            unit=QuantityTypeChoices.KG
+        )
         self.cart_item = CartItemFactory(
             cart = self.cart,
             product=self.product,
@@ -111,7 +116,7 @@ class CartItemModelTest(TestCase):
         """Test cart item creation."""
         self.assertEqual(self.cart_item.cart, self.cart)
         self.assertEqual(self.cart_item.quantity, 2)
-        # self.assertEqual(self.cart_item.product_price, self.product.price)
+        self.assertEqual(self.cart_item.product_price, self.product.price)
         self.assertEqual(
             self.cart_item.product_discounted_price,
             self.product.discounted_price
@@ -126,6 +131,36 @@ class CartItemModelTest(TestCase):
         self.assertIsNone(self.cart_item.created_by)
         self.assertIsNone(self.cart_item.updated_by)
         self.assertIsNone(self.cart_item.deleted_by)
+
+    def test_net_weight_property(self):
+        """Test net weight property."""
+
+        self.assertEqual(self.cart_item.net_weight, "4 Kg")
+
+        product = self.cart_item.product
+
+        product.quantity = 400
+        product.unit = QuantityTypeChoices.GRAM
+        product.save()
+        self.assertEqual(self.cart_item.net_weight, "800 g")
+
+        product.quantity = 1100
+        product.unit = QuantityTypeChoices.GRAM
+        product.save()
+        self.assertEqual(self.cart_item.net_weight, "2.2 Kg")
+
+        self.cart_item.quantity = 1
+        self.cart_item.save()
+        product.quantity = 1100
+        product.unit = QuantityTypeChoices.ML
+        product.save()
+        self.assertEqual(self.cart_item.net_weight, "1.1 L")
+
+        product.quantity = 11
+        product.unit = QuantityTypeChoices.LITRE
+        product.save()
+        self.assertEqual(self.cart_item.net_weight, "11 L")
+
 
 class TestCartView(TestCase):
     """Test Cart View."""

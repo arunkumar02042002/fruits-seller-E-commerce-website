@@ -49,7 +49,7 @@ class Product(BaseModel):
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))]
     )
     stock = models.PositiveIntegerField(null=True, blank=True)
-    quantity = models.IntegerField(null=True, blank=True)
+    quantity = models.IntegerField()
     unit = models.CharField(
         max_length=10,
         choices=QuantityTypeChoices.choices,
