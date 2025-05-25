@@ -8,9 +8,12 @@ from rest_framework import status
 
 from products.factories import ProductFactory
 
-from users.factories import CartFactory, CartItemFactory, UserProfileFactory
+from users.choices import AddressChoices
+from users.factories import (
+    AddressFactory, CartFactory,
+    CartItemFactory, UserProfileFactory
+)
 
-from users.factories import CartFactory, CartItemFactory, UserProfileFactory
 
 class CartItemListAPIViewTests(APITestCase):
     """Test the CartItemListAPIView view."""
@@ -295,3 +298,142 @@ class CartTotalView(APITestCase):
         self.assertEqual(response.data['payload']['sub_total'], self.discountedPrice)
         self.assertEqual(response.data['payload']['delivery_fee'], self.deliveryFee)
         self.assertEqual(response.data['payload']['total'], self.discountedPrice+self.deliveryFee)
+
+
+class AddressListCreateAPIViewTests(APITestCase):
+    """Test the AddressListCreateAPIView view."""
+    def setUp(self):
+        self.client = APIClient()
+        self.profile = UserProfileFactory()
+        self.url = reverse('address-list-create')
+        self.address1 = AddressFactory(
+            profile=self.profile,
+            address_line='123 Main St',
+            near_by='Near Park',
+            city='Test City',
+            state='Test State',
+            country='India',
+            pincode='110001',
+        )
+        self.address2 = AddressFactory(
+            profile=self.profile,
+            address_line='456 Elm St',
+            near_by='Near School',
+            city='Another City',
+            state='Another State',
+            country='India',
+            pincode='110002',
+        )
+
+    def test_get_addresses_authenticated_user(self):
+        """Test get addresses for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['payload']['addresses']), 2)
+
+    def test_get_addresses_guest_user(self):
+        """Test get addresses for guest user."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_create_address_authenticated_user(self):
+        """Test create address for authenticated user."""
+        self.client.force_login(self.profile.user)
+        data = {
+            'address_line': '123 Main St',
+            'near_by': 'Near Park',
+            'city': 'Test City',
+            'state': 'Test State',
+            'country': 'India',
+            'pincode': '110001',
+            'type': AddressChoices.OFFICE,
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['message'], 'Address created successfully.')
+        self.assertEqual(response.data['payload']['address_line'], data['address_line'])
+        self.assertEqual(response.data['payload']['type'], AddressChoices.OFFICE)
+
+    def test_create_address_guest_user(self):
+        """Test create address for guest user."""
+        data = {
+            'address_line': '123 Main St',
+            'near_by': 'Near Park',
+            'city': 'Test City',
+            'state': 'Test State',
+            'country': 'India',
+            'pincode': '110001',
+            'type': AddressChoices.OFFICE,
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class AddressRetrieveUpdateDestroyAPIViewTests(APITestCase):
+    """Test the AddressRetrieveUpdateDestroyAPIView view."""
+    def setUp(self):
+        self.client = APIClient()
+        self.profile = UserProfileFactory()
+        self.address = AddressFactory(profile=self.profile)
+        self.url = reverse('address-retrieve-update-destroy',
+                           kwargs={'uuid': self.address.uuid})
+
+    def test_retrieve_address_authenticated_user(self):
+        """Test retrieve address for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data['payload']['address_line'],
+            self.address.address_line)
+
+    def test_retrieve_address_guest_user(self):
+        """Test retrieve address for guest user."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_address_authenticated_user(self):
+        """Test update address for authenticated user."""
+        self.client.force_login(self.profile.user)
+        data = {
+            'address_line': '789 New St',
+            'near_by': 'Near Mall',
+            'city': 'Updated City',
+            'state': 'Updated State',
+            'country': 'India',
+            'pincode': '110003',
+            'type': AddressChoices.HOME,
+        }
+        response = self.client.put(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Address updated successfully.')
+        self.assertEqual(response.data['payload']['address_line'], data['address_line'])
+    
+    def test_update_address_guest_user(self):
+        """Test update address for guest user."""
+        data = {
+            'address_line': '789 New St',
+            'near_by': 'Near Mall',
+            'city': 'Updated City',
+            'state': 'Updated State',
+            'country': 'India',
+            'pincode': '110003',
+            'type': AddressChoices.HOME,
+        }
+        response = self.client.put(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_address_authenticated_user(self):
+        """Test delete address for authenticated user."""
+        self.client.force_login(self.profile.user)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(
+            response.data['message'], 'Address deleted successfully.'
+        )
+
+    def test_delete_address_guest_user(self):
+        """Test delete address for guest user."""
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
