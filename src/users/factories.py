@@ -24,6 +24,7 @@ class UserFactory(DjangoModelFactory):
     first_name = Faker('first_name')
     last_name = Faker('last_name')
 
+
 class UserProfileFactory(DjangoModelFactory):
     """Create User Profile instances."""
 
@@ -46,17 +47,9 @@ class AddressFactory(DjangoModelFactory):
         """Meta class."""
 
         model = Address
+    
+    profile = SubFactory('users.factories.UserProfileFactory')
 
-    address_line = Faker('address_line')
-    near_by = Faker('near_by')
-    city = Faker('city')
-    state = Faker('state')
-    country = 'India'
-    pincode = LazyAttribute(lambda p: '{}'.format(
-        FuzzyInteger(110000, 999999).fuzz()))
-
-    latitude = Faker('latitude')
-    longitude = Faker('longitude')
 
 class CartFactory(DjangoModelFactory):
     """Create Cart instances."""
@@ -67,6 +60,7 @@ class CartFactory(DjangoModelFactory):
         model = Cart
 
     profile = SubFactory('users.factories.UserProfileFactory')
+
 
 class CartItemFactory(DjangoModelFactory):
     """Create CartItem instances."""
