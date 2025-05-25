@@ -26,3 +26,13 @@ class GlobalVariable:
         for attribute in self.attributes_initialized:
             (delattr(self.thread, attribute) if hasattr(
                 self.thread, attribute) else None)
+
+
+def convert_rupee_to_paisa(rupee):
+    """Convert rupee to paisa."""
+    return float(rupee * 100)
+
+
+def convert_paisa_to_rupee(paisa):
+    """Convert paisa to rupee."""
+    return float(paisa / 100)
