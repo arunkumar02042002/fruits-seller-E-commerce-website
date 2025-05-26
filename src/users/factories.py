@@ -34,8 +34,6 @@ class UserProfileFactory(DjangoModelFactory):
         model = Profile
 
     user = SubFactory('users.factories.UserFactory')
-    mobile = LazyAttribute(lambda p: '{}'.format(
-        FuzzyInteger(6000000000, 9999999999).fuzz()))
     alternate_number = LazyAttribute(lambda p: '{}'.format(
         FuzzyInteger(6000000000, 9999999999).fuzz()))
 

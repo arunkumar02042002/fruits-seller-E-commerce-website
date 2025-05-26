@@ -1,16 +1,17 @@
-from django.http import HttpRequest, HttpResponse
-from django.urls import reverse
-from django.views import View
-from django.views.generic.base import TemplateResponseMixin
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib import messages
+from django.http import HttpRequest
+from django.db.models import Q
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views import View
+from django.views.generic.base import TemplateResponseMixin
 from django.shortcuts import redirect
 
 from authentication.tokens import account_activation_token
@@ -32,9 +33,16 @@ class SignUpView(View, TemplateResponseMixin):
         return self.render_to_response(context={"form": self.form_class()})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
         email = request.POST.get("email")
-        User.objects.filter(email=email, is_active=False).delete()
+        mobile_number = request.POST.get("mobile_number")
+        user = user = User.objects.filter(
+            Q(email=email) | Q(mobile_number=mobile_number, is_active=False)
+        ).first()
+        if user is not None:
+            form = self.form_class(instance=user, data=request.POST)
+        else:
+            form = self.form_class(request.POST)
+
         if form.is_valid() is False:
             return self.render_to_response(context={"form": form})
 
@@ -65,7 +73,6 @@ class SignUpView(View, TemplateResponseMixin):
                 "We have sent a verification link to your email. Please verify your account!",
             )
         except Exception as e:
-            print(e)
             form.add_error("", "Error Occurred while Sending Email, Try Again!")
             messages.error(request, "Error occurred while sending mail")
             return self.render_to_response({"form": form})
@@ -78,7 +85,6 @@ class AccountActivateView(View):
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.filter(pk=uid).first()
         except Exception as e:
-            print(e)
             user = None
 
         if (
@@ -87,6 +93,7 @@ class AccountActivateView(View):
         ):
             user.is_active = True
             user.save()
+            # Create a profile for the user if it doesn't exist
             Profile.objects.create(user=user)
             messages.success(
                 request, "Your account has been verified. Please login to continue!"

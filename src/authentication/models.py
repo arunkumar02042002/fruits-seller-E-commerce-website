@@ -97,7 +97,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
 
     email = models.EmailField(_("email address"), unique=True, db_index=True)
-
+    mobile_number = models.CharField(
+        _("mobile number"),
+        max_length=15,
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+    )
     role = models.CharField(
         max_length=15, choices=UserRoleChoices.choices, default=UserRoleChoices.USER
     )

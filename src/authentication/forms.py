@@ -27,10 +27,17 @@ class SignUpForm(forms.ModelForm):
         widget=forms.PasswordInput,
         help_text=_("Enter the same password as above, for verification."),
     )
+    mobile_number = forms.CharField(
+        label=_("Mobile"),
+        max_length=10,
+        min_length=10,
+        required=False,
+        help_text=_("Enter your mobile number."),
+    )
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name", "mobile_number")
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
