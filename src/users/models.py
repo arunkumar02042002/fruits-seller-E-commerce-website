@@ -23,11 +23,6 @@ class Profile(BaseModel):
         upload_to="users/cover_photos", blank=True, null=True,
         default='users/cover_photos/default_cover.jpg'
     )
-    mobile = models.CharField(
-        max_length=10, blank=True,
-        null=True, unique=True,
-        db_index=True, verbose_name='Mobile Number'
-    )
     alternate_number = models.CharField(
         max_length=10, blank=True, null=True,
         unique=True, db_index=True,

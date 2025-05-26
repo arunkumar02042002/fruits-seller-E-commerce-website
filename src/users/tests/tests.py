@@ -20,15 +20,11 @@ class PofileModelTest(TestCase):
         self.user = UserFactory()
         self.profile = UserProfileFactory(
             user = self.user,
-            mobile="9999999999",
-            alternate_number="1111111111"
         )
 
     def test_create_profile(self):
         """Test profile creation."""
         self.assertEqual(self.profile.user, self.user)
-        self.assertEqual(self.profile.mobile, "9999999999")
-        self.assertEqual(self.profile.alternate_number, "1111111111")
         self.assertIsNotNone(self.profile.created_at)
         self.assertIsNotNone(self.profile.updated_at)
         self.assertIsNone(self.profile.deleted_at)

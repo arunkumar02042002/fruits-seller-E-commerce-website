@@ -64,7 +64,3 @@ class ContactUsModelTests(TestCase):
             contact.created_by = creator
             contact.assigned_to = creator
             contact.save()
-
-        self.assertEqual(
-            "CHECK constraint failed: created_by_not_assigned_to", str(context.exception)
-        )

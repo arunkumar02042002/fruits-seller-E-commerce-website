@@ -108,6 +108,7 @@ class SignUpViewTests(TestCase):
         """Test that a valid form submission creates a user and sends email"""
         form_data = {
             "email": "test@example.com",
+            "mobile_number": "1234567890",
             "password1": "testpassword123",
             "password2": "testpassword123",
             "first_name": "test",
@@ -118,6 +119,7 @@ class SignUpViewTests(TestCase):
         user = User.objects.filter(email="test@example.com").first()
         self.assertIsNotNone(user)
         self.assertEqual(user.email, "test@example.com")
+        self.assertEqual(user.mobile_number, "1234567890")
         self.assertEqual(user.first_name, "test")
         self.assertEqual(user.last_name, "user")
         self.assertTrue(user.check_password("testpassword123"))
@@ -145,6 +147,7 @@ class SignUpViewTests(TestCase):
             "password1": "testpassword123",
             "password2": "testpassword123",
             "email": "test@example.com",
+            "mobile_number": "1234567890",
             "first_name": "test",
             "last_name": "user",
         }
@@ -227,9 +230,8 @@ class AccountActivateViewTests(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_active)
 
-        # Check that the Profile is created
-        profile_exists = Profile.objects.filter(user=self.user).exists()
-        self.assertTrue(profile_exists)
+        # Check user's profile is created
+        self.assertTrue(Profile.objects.filter(user=self.user).exists())
 
         # Check that the user is redirected to the login page
         self.assertRedirects(response, reverse("login"))
