@@ -31,3 +31,11 @@ class PaymentMethodChoices(IntegerChoices):
     NOT_SET = 0, 'Not Set'
     COD = 1, 'Cash on Delivery'
     RAZORPAY = 2, 'Razorpay'
+
+    @classmethod
+    def payment_method_list(cls):
+        """Return list of payment methods."""
+        return [
+            PaymentMethodChoices.COD,
+            PaymentMethodChoices.RAZORPAY,
+        ]

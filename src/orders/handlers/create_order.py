@@ -90,6 +90,13 @@ class CreateOrders:
         if not cart.profile:
             cart.profile = self.user.profile
             cart.save()
+        
+        paynent_method = self.request_data.get('payment_method', None)
+        if paynent_method not in PaymentMethodChoices.payment_method_list():
+            raise ValidationError(
+                f"Invalid payment method."
+            )
+        self.payment_method = paynent_method 
 
     def get_cart(self):
         """Get the cart associated with the user or IP address."""
@@ -181,6 +188,16 @@ class CreateOrders:
         order.status = OrderStatusChoices.CREATED
         order.save()
 
+        if self.payment_method == PaymentMethodChoices.COD:
+            order.payment_method = PaymentMethodChoices.COD
+            order.status = OrderStatusChoices.PLACED
+            order.save()
+            return {
+                'order_id': order.uuid,
+                'payment_method': PaymentMethodChoices.COD,
+                'payable_amount': order.total_amount * 100,
+            }
+
         # Create order on razorpay
         self.create_order_on_razorpay(order)
 
@@ -189,5 +206,6 @@ class CreateOrders:
             'callback_url':  self.callback_url,
             'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             'payable_amount': order.total_amount*100,
+            'payment_method': PaymentMethodChoices.RAZORPAY,
         }
         return context
