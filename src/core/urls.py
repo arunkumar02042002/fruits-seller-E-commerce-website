@@ -24,11 +24,11 @@ urlpatterns = [
     path("", include("main.urls")),
     path("authentication/", include("authentication.urls")),
     path("contact/", include("contact.urls")),
-    path("orders/", include("orders.urls")),
     path("products/", include("products.urls")),
     path("users/", include("users.urls")),
     # API Views
     path("api/v1/authentication/", include("authentication.api.v1.urls")),
+    path("api/v1/orders/", include("orders.api.v1.urls")),
     path("api/v1/products/", include("products.api.v1.urls")),
     path("api/v1/users/", include("users.api.v1.urls")),
     # Third-party

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from common.models import BaseModel
@@ -15,7 +17,12 @@ from users.models import Address, Profile
 
 # Create your models here.
 class Order(BaseModel):
+    """Model to represent an order."""
 
+    order_id = models.CharField(
+        max_length=100, unique=True, db_index=True,
+        verbose_name="Unique identifier for the order."
+    )
     profile = models.ForeignKey(
         Profile, on_delete=models.CASCADE, related_name="orders"
     )
@@ -29,9 +36,9 @@ class Order(BaseModel):
     )
     shipping_address = models.ForeignKey(
         Address, on_delete=models.CASCADE,
-        null=True, blank=True
+        null=True, blank=True,
     )
-    shiping_charges = models.DecimalField(
+    shipping_charges = models.DecimalField(
         max_digits=10, decimal_places=2, default=SHIPPING_CHARGE
     )
     order_amount = models.DecimalField(
@@ -58,21 +65,31 @@ class Order(BaseModel):
     razorpay_payment_id = models.CharField(max_length=500, null=True, blank=True)
     razorpay_signature = models.CharField(max_length=500, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if self.coupon and self.status in OrderStatusChoices.order_initiated_status_list():
-            self.coupon_discount = self.coupon.discount
 
     def __str__(self):
         return f"Order by profile:{self.profile_id}"
+    
+    def save(self, *args, **kwargs):
+        today = datetime.today().strftime("%Y%m%d")
+        if not self.order_id:
+            self.order_id = f"ODR_{today}{str(self.uuid).upper()[-6:]}"
+
+        if self.coupon and self.status in OrderStatusChoices.order_initiated_status_list():
+            self.coupon_discount = self.coupon.discount
+
+        if not self.total_amount:
+            self.total_amount = (
+                self.order_amount + self.shipping_charges - self.coupon_discount
+            )
+        super(Order, self).save(*args, **kwargs)
 
 class ProductInOrder(BaseModel):
     
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="products"
+        Order, on_delete=models.CASCADE, related_name="products_in_order"
     )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE,
-        null=True, blank=True
     )
     quantity = models.PositiveIntegerField(default=1)
     product_price = models.DecimalField(

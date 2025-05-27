@@ -26,7 +26,8 @@ class PaymentStatusChoices(IntegerChoices):
     SUCCESS = 1, 'Success'
     FAILED = 2, 'Failed'
 
+
 class PaymentMethodChoices(IntegerChoices):
     NOT_SET = 0, 'Not Set'
-    ONLINE = 1, 'Online'
-    COD = 2, 'Cash on Delivery'
+    COD = 1, 'Cash on Delivery'
+    RAZORPAY = 2, 'Razorpay'

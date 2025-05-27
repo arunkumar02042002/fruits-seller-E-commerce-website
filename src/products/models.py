@@ -48,6 +48,9 @@ class Product(BaseModel):
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))]
     )
+    discounted_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
     stock = models.PositiveIntegerField(null=True, blank=True)
     quantity = models.IntegerField()
     unit = models.CharField(
@@ -65,14 +68,6 @@ class Product(BaseModel):
 
     tags = models.ManyToManyField(Tag, through="ProductTag", related_name="products")
 
-    @property
-    def discounted_price(self):
-        # Ensure that both price and discount_in_percent are Decimal
-        price_decimal = Decimal(self.price)
-        discount_decimal = Decimal(self.discount_in_percent)
-        discounted_price = price_decimal * (1 - discount_decimal / Decimal(100))
-        return round(discounted_price, 2)
-
     def __str__(self) -> str:
         return self.name
 
@@ -83,6 +78,12 @@ class Product(BaseModel):
     def save(self, *args, **kwargs):
         if self.sub_category:
             self.sub_category = self.sub_category.lower()
+
+        if not self.discounted_price:
+            price_decimal = Decimal(self.price)
+            discount_decimal = Decimal(self.discount_in_percent)
+            discounted_price = price_decimal * (1 - discount_decimal / Decimal(100))
+            self.discounted_price = round(discounted_price, 2)
         return super().save(*args, **kwargs)
 
 

@@ -490,7 +490,6 @@ class AddReviewAPIViewTest(TestCase):
         url = reverse("add-review", kwargs={"uuid": p.uuid})
         self.client.force_authenticate(user=profile.user)
         response = self.client.post(url, {"rating": 4, "review": "Good Product"})
-        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["status"], "success")
         self.assertEqual(response.data["message"], "Product review added successfully.")
