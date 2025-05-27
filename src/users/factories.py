@@ -23,6 +23,8 @@ class UserFactory(DjangoModelFactory):
     password = make_password('password')
     first_name = Faker('first_name')
     last_name = Faker('last_name')
+    mobile_number = LazyAttribute(lambda o: '{}'.format(
+        FuzzyInteger(6000000000, 9999999999).fuzz()))
 
 
 class UserProfileFactory(DjangoModelFactory):

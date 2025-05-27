@@ -47,3 +47,15 @@ class AddressSerializer(serializers.ModelSerializer):
                 "Profile is required to save address.")
         self.validated_data['profile'] = profile
         return super().save(**kwargs)
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'first_name',
+            'last_name',
+            'mobile_number',
+        ]
