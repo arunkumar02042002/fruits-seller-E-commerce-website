@@ -6,7 +6,7 @@ from unittest.mock import patch
 from django.test import Client, TestCase
 
 from orders.constants import SHIPPING_CHARGE
-from orders.choices import OrderStatusChoices
+from orders.choices import OrderStatusChoices, PaymentMethodChoices
 
 from products.factories import ProductFactory
 
@@ -70,13 +70,17 @@ class CreateOrderViewTests(TestCase):
 
         self.client.force_login(self.profile.user)
 
-        response = self.client.post(self.url, {
-            'address_id': self.address.uuid,
-        })
+        response = self.client.post(self.url, json.dumps({
+            'address_id': str(self.address.uuid),
+            'payment_method': PaymentMethodChoices.RAZORPAY,
+        }), content_type='application/json')
+
         self.assertEqual(response.status_code, 201)
         response_data = response.json()
         self.assertIn('order_id', response_data['payload'])
         self.assertEqual(49900, response_data['payload']['payable_amount'])
+        self.assertEqual(response_data['payload']['payment_method'],
+                         PaymentMethodChoices.RAZORPAY)
 
         order_id = response_data['payload']['order_id']
         order = self.profile.orders.get(uuid=order_id)
@@ -86,6 +90,7 @@ class CreateOrderViewTests(TestCase):
         self.assertEqual(order.products_in_order.count(), 2)
         self.assertEqual(order.order_amount, 400)
         self.assertEqual(order.total_amount, 400+SHIPPING_CHARGE)
+        self.assertEqual(order.payment_method, PaymentMethodChoices.RAZORPAY)
 
     @patch('orders.handlers.create_order.razorpay_client.create_order')
     def test_create_order_with_new_address(self, razorpay_create_order):
@@ -99,7 +104,8 @@ class CreateOrderViewTests(TestCase):
                 "city": "Another City",
                 "state": "Another State",
                 "pincode": "654321"
-            }
+            },
+            "payment_method": PaymentMethodChoices.RAZORPAY,
         }),
         content_type='application/json'
         )
@@ -127,7 +133,8 @@ class CreateOrderViewTests(TestCase):
                 "first_name": "Test",
                 "last_name": "User",
                 "mobile_number": "1234567890"
-            }
+            },
+            "payment_method": PaymentMethodChoices.RAZORPAY
         }),
         content_type='application/json'
         )
@@ -153,7 +160,8 @@ class CreateOrderViewTests(TestCase):
                 "first_name": "Test",
                 "last_name": "User",
                 "mobile_number": "1234567890"
-            }
+            },
+            "payment_method": PaymentMethodChoices.RAZORPAY
         }),
         content_type='application/json'
         )
@@ -222,9 +230,10 @@ class CreateOrderViewTests(TestCase):
         self.client.force_login(self.profile.user)
         self.cart.cart_items.all().delete()
 
-        response = self.client.post(self.url, {
-            'address_id': self.address.uuid,
-        })
+        response = self.client.post(self.url, json.dumps({
+            'address_id': str(self.address.uuid),
+            "payment_method": PaymentMethodChoices.RAZORPAY
+        }), content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
         response_data = response.json()
@@ -276,3 +285,29 @@ class CreateOrderViewTests(TestCase):
             response_data['message'],
             "mobile_number: user with this mobile number already exists."
         )
+
+    def test_create_order_COD(self):
+        """Test the create order view with a successful COD."""
+
+        self.client.force_login(self.profile.user)
+
+        response = self.client.post(self.url, json.dumps({
+            'address_id': str(self.address.uuid),
+            'payment_method': PaymentMethodChoices.COD,
+        }), content_type='application/json')
+
+        self.assertEqual(response.status_code, 201)
+        response_data = response.json()
+        self.assertIn('order_id', response_data['payload'])
+        self.assertEqual(49900, response_data['payload']['payable_amount'])
+        self.assertEqual(response_data['payload']['payment_method'], PaymentMethodChoices.COD)
+
+        order_id = response_data['payload']['order_id']
+        order = self.profile.orders.get(uuid=order_id)
+        self.assertEqual(order.status, OrderStatusChoices.PLACED)
+        self.assertEqual(order.shipping_address, self.address)
+        self.assertEqual(order.profile, self.profile)
+        self.assertEqual(order.products_in_order.count(), 2)
+        self.assertEqual(order.order_amount, 400)
+        self.assertEqual(order.total_amount, 400+SHIPPING_CHARGE)
+        self.assertEqual(order.payment_method, PaymentMethodChoices.COD)

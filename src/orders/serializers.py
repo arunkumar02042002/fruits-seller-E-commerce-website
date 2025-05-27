@@ -11,7 +11,7 @@ class OrderSerializer(serializers.Serializer):
     address_data = AddressSerializer(required=False)
     user_data = CreateUserSerializer(required=False)
     payment_method = serializers.ChoiceField(
-        choices=PaymentMethodChoices.choices
+        choices=PaymentMethodChoices.payment_method_list()
     )
     address_id = serializers.UUIDField(required=False)
 
