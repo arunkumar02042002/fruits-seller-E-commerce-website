@@ -169,7 +169,6 @@ class AddressListCreateAPIView(ListCreateAPIView):
         serializer.save(profile=user.profile)
 
 
-
 class AddressRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete address."""
     permission_classes = [IsAuthenticated]

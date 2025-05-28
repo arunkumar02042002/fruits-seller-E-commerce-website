@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style>
+    .checkmark {
+        color: #9ABC66;
+        font-size: 100px;
+        line-height: 200px;
+        margin-left:-15px;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center text-center my-5 py-5 mx-auto">
+    <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5;" class="my-5">
+        <i class="checkmark">✓</i>
+    </div>
+    <h3>Success</h3> 
+    <p>Your order has been successfully placed.<br/>Our delivery partner will contact you shortly.</p>
+</div>
+{% endblock %}

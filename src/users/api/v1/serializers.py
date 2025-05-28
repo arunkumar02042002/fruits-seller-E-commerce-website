@@ -39,7 +39,7 @@ class AddToCartSerializer(serializers.Serializer):
             # nowait=True directly raises an error if the object is locked
             cart = (
                 Cart.objects.filter(profile=profile) or
-                Cart.objects.filter(ip_address=ip_address)
+                Cart.objects.filter(ip_address=ip_address, profile__isnull=True)
             ).select_for_update(nowait=True).first()
 
             if not cart:

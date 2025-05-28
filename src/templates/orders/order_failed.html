@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style>
+    .checkmark {
+        color:rgb(236, 92, 92);
+        font-size: 100px;
+        line-height: 200px;
+        margin-left:-15px;
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center text-center my-5 py-5 mx-auto">
+    <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5;" class="my-5">
+        <i class="checkmark">❌</i>
+    </div>
+    <h3>Order Failed</h3> 
+    <p>We could not complete your order.<br/>Please try after some time.</p>
+    <p>If the issue contiues please <a href={% url 'contact' %} target="_blank">contact us.</a></p>
+</div>
+{% endblock %}

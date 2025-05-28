@@ -3,9 +3,9 @@ const CART_ITEM_URL = `${window.location.origin}/api/v1/users/cart`;
 const CART_TOTAL_URL = `${window.location.origin}/api/v1/users/cart/total`;
 const APPLY_COUPON_URL = `${window.location.origin}/api/v1/products/check-coupon/`;
 
-const COUPON_DIV = document.getElementById('coupon-div');
-const COUPON_FORM = document.getElementById('coupon-form');
-const COUPON_INPUT = document.getElementById('coupon-input');
+// const COUPON_DIV = document.getElementById('coupon-div');
+// const COUPON_FORM = document.getElementById('coupon-form');
+// const COUPON_INPUT = document.getElementById('coupon-input');
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -490,77 +490,77 @@ function updateCartTotal(data){
 }
 
 
-COUPON_INPUT.addEventListener('input', () => {
-    let coupon = COUPON_INPUT.value;
-    if (coupon.length > 0) {
-        COUPON_FORM.children[1].disabled = false;
-    } else {
-        COUPON_FORM.children[1].disabled = true;
-    }
-});
+// COUPON_INPUT.addEventListener('input', () => {
+//     let coupon = COUPON_INPUT.value;
+//     if (coupon.length > 0) {
+//         COUPON_FORM.children[1].disabled = false;
+//     } else {
+//         COUPON_FORM.children[1].disabled = true;
+//     }
+// });
 
 
-COUPON_FORM.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    let code = document.getElementById('coupon-input').value;
-    let url = new URL(APPLY_COUPON_URL);
+// COUPON_FORM.addEventListener('submit', async (e) => {
+//     e.preventDefault();
+//     let code = document.getElementById('coupon-input').value;
+//     let url = new URL(APPLY_COUPON_URL);
 
-    COUPON_FORM.children[1].disabled = true;
+//     COUPON_FORM.children[1].disabled = true;
 
-    // Remove all p elements with class 'text-danger' from COUPON_DIV
-    let errorMessages = COUPON_DIV.querySelectorAll('p.text-danger');
-    errorMessages.forEach(message => message.remove());
+//     // Remove all p elements with class 'text-danger' from COUPON_DIV
+//     let errorMessages = COUPON_DIV.querySelectorAll('p.text-danger');
+//     errorMessages.forEach(message => message.remove());
     
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ code: code })
-        });
+//     try {
+//         const response = await fetch(url, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'X-Requested-With': 'XMLHttpRequest',
+//                 'X-CSRFToken': getCookie('csrftoken'),
+//             },
+//             body: JSON.stringify({ code: code })
+//         });
 
-        const data = await response.json();
+//         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error("Invalid Coupon.");
-        }
+//         if (!response.ok) {
+//             throw new Error("Invalid Coupon.");
+//         }
 
-        COUPON_FORM.children[1].disabled = true;
-        let coupon = document.createElement('p');
-        coupon.textContent = data.payload.code;
-        coupon.classList.add('text-dark', 'bg-secondary', 'rounded-pill', 'p-2', 'd-inline-block', 'mt-3', 'me-3');
+//         COUPON_FORM.children[1].disabled = true;
+//         let coupon = document.createElement('p');
+//         coupon.textContent = data.payload.code;
+//         coupon.classList.add('text-dark', 'bg-secondary', 'rounded-pill', 'p-2', 'd-inline-block', 'mt-3', 'me-3');
 
-        let closeBtn = document.createElement('i');
-        closeBtn.classList.add("fa-regular", "fa-circle-xmark", "text-danger", "cursor-pointer");
-        coupon.appendChild(closeBtn);
+//         let closeBtn = document.createElement('i');
+//         closeBtn.classList.add("fa-regular", "fa-circle-xmark", "text-danger", "cursor-pointer");
+//         coupon.appendChild(closeBtn);
 
-        updateCartTotal(data.payload);
-        let cartTotal = document.getElementById('total-price');
-        cartTotal.innerHTML = data.payload.discounted_total;
+//         updateCartTotal(data.payload);
+//         let cartTotal = document.getElementById('total-price');
+//         cartTotal.innerHTML = data.payload.discounted_total;
 
-        let span = document.createElement('span');
-        span.classList.add('text-decoration-line-through', 'text-danger', 'ms-3');
-        span.innerText = data.payload.total;
+//         let span = document.createElement('span');
+//         span.classList.add('text-decoration-line-through', 'text-danger', 'ms-3');
+//         span.innerText = data.payload.total;
 
-        cartTotal.appendChild(span);
+//         cartTotal.appendChild(span);
 
-        closeBtn.addEventListener('click', () => {
-            COUPON_DIV.removeChild(coupon);
-            COUPON_FORM.children[1].disabled = false;
-            updateCartTotal(data.payload);
-        });
+//         closeBtn.addEventListener('click', () => {
+//             COUPON_DIV.removeChild(coupon);
+//             COUPON_FORM.children[1].disabled = false;
+//             updateCartTotal(data.payload);
+//         });
 
-        COUPON_DIV.appendChild(coupon);
-    } catch (error) {
-        let p = document.createElement('p');
-        p.textContent = error.message;
-        p.classList.add('text-danger');
-        COUPON_DIV.appendChild(p);
-    }
-});
+//         COUPON_DIV.appendChild(coupon);
+//     } catch (error) {
+//         let p = document.createElement('p');
+//         p.textContent = error.message;
+//         p.classList.add('text-danger');
+//         COUPON_DIV.appendChild(p);
+//     }
+// });
 
 
 function createLoader(){

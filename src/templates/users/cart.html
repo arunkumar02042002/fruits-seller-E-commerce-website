@@ -48,17 +48,17 @@
                         </div>
                         <p class="mb-0 text-end">Shipping to Your Location.</p>
                     </div>
-                    <div class="mt-2 p-4" id="coupon-div">
+                    {% comment %} <div class="mt-2 p-4" id="coupon-div">
                         <form  id="coupon-form" class="d-flex justify-content-between">
                             <input type="text" class="border-0 border-bottom rounded p-2" placeholder="Coupon Code"  id="coupon-input">
                             <button class="btn border-secondary rounded-pill p-2 text-primary" disabled type="submit">Apply Coupon</button>
                         </form>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                         <h5 class="mb-0 ps-4 me-4">Total</h5>
                         <p class="mb-0 pe-4" id="total-price"></p>
                     </div>
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
+                    <a href={% url 'checkout' %} class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</a>
                 </div>
             </div>
         </div>

@@ -1,3 +1,4 @@
 """Constants for the orders app."""
+from decimal import Decimal
 
-SHIPPING_CHARGE = 99.00
+SHIPPING_CHARGE = Decimal(99.00)
