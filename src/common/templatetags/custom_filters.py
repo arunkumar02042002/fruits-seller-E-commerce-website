@@ -20,6 +20,8 @@ def findRange(value):
     return range(value)
 
 def roundValue(value):
+    if value is None:
+        return ''
     return round(value, 2)
 
 

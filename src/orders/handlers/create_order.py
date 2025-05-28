@@ -160,6 +160,16 @@ class CreateOrders:
         order.payment_method = PaymentMethodChoices.RAZORPAY
         order.save()
 
+    def create_cod_order(self, order):
+        order.payment_method = PaymentMethodChoices.COD
+        order.status = OrderStatusChoices.PLACED
+        order.save()
+        return {
+            'order_id': order.uuid,
+            'payment_method': PaymentMethodChoices.COD,
+            'payable_amount': order.total_amount * 100,
+        }
+
     def create_order(self, **kwargs):
         """Create an order from the cart."""
         cart_items = self.get_cart_items()
@@ -188,24 +198,21 @@ class CreateOrders:
         order.status = OrderStatusChoices.CREATED
         order.save()
 
+        context = {}
         if self.payment_method == PaymentMethodChoices.COD:
-            order.payment_method = PaymentMethodChoices.COD
-            order.status = OrderStatusChoices.PLACED
-            order.save()
-            return {
+            # Create order for COD payment method
+            context = self.create_cod_order(order)
+        
+        elif self.payment_method == PaymentMethodChoices.RAZORPAY:
+            # Create order on razorpay
+            self.create_order_on_razorpay(order)
+            context={
                 'order_id': order.uuid,
-                'payment_method': PaymentMethodChoices.COD,
+                'callback_url':  self.callback_url,
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
                 'payable_amount': order.total_amount * 100,
+                'payment_method': PaymentMethodChoices.RAZORPAY,
             }
 
-        # Create order on razorpay
-        self.create_order_on_razorpay(order)
-
-        context={
-            'order_id': order.uuid,
-            'callback_url':  self.callback_url,
-            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-            'payable_amount': order.total_amount*100,
-            'payment_method': PaymentMethodChoices.RAZORPAY,
-        }
+        self.cart.cart_items.all().delete()  # Clear the cart after order creation
         return context

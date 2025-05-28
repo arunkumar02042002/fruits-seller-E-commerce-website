@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Sum
 
 from common.models import BaseModel
 
@@ -29,9 +30,6 @@ class Profile(BaseModel):
         verbose_name='Alternate Number',
     )
 
-    def full_address(self):
-        return f"{self.address}, {self.city}, {self.state}, {self.country}, {self.pin_code}"
-
     def __str__(self):
         return f"{self.user.email}_{self.user.role}"
 
@@ -56,8 +54,9 @@ class Address(BaseModel):
     latitude = models.CharField(max_length=255, blank=True, null=True)
     longitude = models.CharField(max_length=255, blank=True, null=True)
 
+    @property
     def full_address(self):
-        return f"{self.address}, {self.city}, {self.state}, {self.country}, {self.pin_code}"
+        return f"{self.address_line}, {self.city}, {self.state}, {self.pincode}"
 
 class Cart(BaseModel):
     profile = models.OneToOneField(
@@ -68,6 +67,12 @@ class Cart(BaseModel):
     ip_address = models.GenericIPAddressField(
         blank=True, null=True
     )
+
+    @property
+    def cart_amount(self):
+        return self.cart_items.aggregate(
+            sub_total=Sum('total_price')
+        )['sub_total'] or 0.00
 
     def __str__(self):
         return  f"profile-{self.profile_id}-cart"

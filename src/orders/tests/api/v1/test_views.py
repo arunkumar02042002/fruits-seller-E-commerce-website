@@ -92,6 +92,10 @@ class CreateOrderViewTests(TestCase):
         self.assertEqual(order.total_amount, 400+SHIPPING_CHARGE)
         self.assertEqual(order.payment_method, PaymentMethodChoices.RAZORPAY)
 
+        # Check cart is empty after order creation
+        self.cart.refresh_from_db()
+        self.assertEqual(self.cart.cart_items.count(), 0)
+
     @patch('orders.handlers.create_order.razorpay_client.create_order')
     def test_create_order_with_new_address(self, razorpay_create_order):
         """Test the create order view with a new address and a successful Razorpay response."""

@@ -1,0 +1,47 @@
+{% load static %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="add-address-form">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-12">
+                <div class="form-item w-100">
+                    <label class="form-label my-3">Address Line<sup>*</sup></label>
+                    <input type="text" class="form-control" required name="address_line" placeholder="House Number/Street Name"> 
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-item w-100">
+                    <label class="form-label my-3">City/Town<sup>*</sup></label>
+                    <input type="text" class="form-control" required name="city" placeholder="City/Town">
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-item w-100">
+                    <label class="form-label my-3">State<sup>*</sup></label>
+                    <input type="text" class="form-control" required name="state" placeholder="State">
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-item w-100">
+                    <label class="form-label my-3">Pincode<sup>*</sup></label>
+                    <input type="text" class="form-control" required name="pincode" placeholder="PostCode/Zip">
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Add Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/add_address.js' %}"></script>
