@@ -30,7 +30,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG").lower() in (1, "t", "true")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django_filters",
     "crispy_forms",
     "django_ckeditor_5",
+    "storages",
     # local
     "authentication",
     "common",
@@ -161,11 +162,42 @@ TEST_DISCOVER_TOP_LEVEL = BASE_DIR
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-STATIC_ROOT = "staticfiles/"
+USE_S3 = config('USE_S3').upper() == 'TRUE'
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    # s3 static settings
+    # AWS_LOCATION = 'static'
+    # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    # s3 public media settings
+    # PUBLIC_MEDIA_LOCATION = 'media'
+    # MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    STORAGES = {
+        # Media file (image) management  
+        "default": {
+            "BACKEND": "core.storage_backends.PublicMediaStorage",
+            "LOCATION": "media",
+            "FILE_OVERWRITE": False,
+        },
+
+        # CSS and JS file management
+        "staticfiles": {
+            "BACKEND": "core.storage_backends.StaticStorage",
+            "LOCATION": "static",
+        },
+    }
+else:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 # CKEditor
 CKEDITOR_5_CONFIGS = {
@@ -179,14 +211,10 @@ CKEDITOR_5_CONFIGS = {
   },
 }
 
-MEDIA_URL = "media/"
-MEDIA_ROOT = "media/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_PORT = config("EMAIL_PORT")

@@ -4,7 +4,7 @@ import uuid
 from django.utils import timezone
 
 from factory import Faker, LazyFunction, post_generation, Sequence
-from factory.django import DjangoModelFactory, ImageField
+from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyDecimal
 
 from products.choices import ProductCategoryChoice, QuantityTypeChoices
@@ -28,7 +28,6 @@ class ProductFactory(DjangoModelFactory):
     )
     sub_category = Faker('word')
     discount_in_percent = LazyFunction(lambda: round(random.uniform(0, 50), 2))
-    image = ImageField(color="blue")
     price = FuzzyDecimal(50, 500)
     discount_in_percent = FuzzyDecimal(10, 100)
     quantity = 1
