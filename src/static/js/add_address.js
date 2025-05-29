@@ -38,7 +38,6 @@ ADD_ADDRESS_FORM.addEventListener('submit', async (event) => {
     for (const [key, value] of formData.entries()) {
         data[key] = value;
     }
-    console.log(data);
 
     try {
         const response = await fetch(url, {
